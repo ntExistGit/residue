@@ -1,0 +1,47 @@
+{
+	"schemaVersion": 1,
+	"id": "residue",
+	"version": "${version}",
+	"name": "Residue",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/residue/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.upphorattexistera.residuemod.Residue"
+		],
+		"client": [
+			"com.upphorattexistera.residuemod.client.ResidueClient"
+		],
+		"fabric-datagen": [
+			"com.upphorattexistera.residuemod.client.ResidueDataGenerator"
+		],
+      "voicechat": [
+            "com.upphorattexistera.residuemod.ResidueVoicechatPlugin"
+        ]
+	},
+	"mixins": [
+		"residue.mixins.json",
+		{
+			"config": "residue.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*",
+
+		"yet_another_config_lib_v3": ">=3.9.4+26.1-fabric",
+        "voicechat_api": ">=2.6.13"
+	}
+}

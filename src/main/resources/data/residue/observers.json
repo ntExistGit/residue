@@ -1,0 +1,12 @@
+{
+  "observers": [
+    {
+      "name": "DarkFox",
+      "weight": 100
+    },
+    {
+      "name": "Alex",
+      "weight": 80
+    }
+  ]
+}
