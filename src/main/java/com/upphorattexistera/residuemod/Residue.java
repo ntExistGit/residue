@@ -1,8 +1,7 @@
 package com.upphorattexistera.residuemod;
 
 import com.upphorattexistera.residuemod.command.ResidueCommands;
-import com.upphorattexistera.residuemod.event.EventDirector;
-import com.upphorattexistera.residuemod.memory.MemoryManager;
+import com.upphorattexistera.residuemod.observer.ObserverDataLoader;
 import com.upphorattexistera.residuemod.observer.ObserverManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -19,17 +18,13 @@ public class Residue implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        LOGGER.info("Residue initializing...");
+        ServerTickEvents.END_SERVER_TICK.register(
+                ResidueTickHandler::tick
+        );
 
-        MemoryManager.load();
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-
-            ObserverManager.load(server);
-
-            LOGGER.info(
-                    "Loaded observers: "
-                            + ObserverManager.getAll().size()
-            );
+            ObserverManager.setDatabase(ObserverDataLoader.load(server));
+            LOGGER.info("[Residue] loaded {} observers", ObserverManager.getAll().size());
         });
 
         CommandRegistrationCallback.EVENT.register(
@@ -37,8 +32,6 @@ public class Residue implements ModInitializer {
                         ResidueCommands.register(dispatcher)
         );
 
-        ServerTickEvents.END_SERVER_TICK.register(EventDirector::tick);
-
-        LOGGER.info("Residue initialized");
+        LOGGER.info("[Residue] initialized");
     }
 }

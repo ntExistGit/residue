@@ -1,23 +1,42 @@
 package com.upphorattexistera.residuemod.event;
 
-import com.upphorattexistera.residuemod.event.events.ObserverJoinEvent;
-import com.upphorattexistera.residuemod.memory.MemoryManager;
+import com.upphorattexistera.residuemod.WorldState;
+import com.upphorattexistera.residuemod.event.events.DistantTorchEvent;
 import net.minecraft.server.MinecraftServer;
 
 public class EventDirector {
 
-    private static long ticks = 0;
-
     public static void tick(MinecraftServer server) {
 
-        ticks++;
+        int memory = WorldState.memory;
 
-        if (ticks % 1200 != 0) return;
+        if (WorldState.activeObserver == null) return;
 
-        MemoryManager.addMemory(1);
-
-        if (MemoryManager.getMemory() == 5) {
-            ObserverJoinEvent.trigger(server);
+        // stage 1
+        if (memory > 20 && memory < 40) {
+            tryJoinEcho(server);
         }
+
+        // stage 2
+        if (memory >= 40 && memory < 60) {
+            tryDistantTorch(server);
+        }
+
+        // stage 3
+        if (memory >= 60) {
+            tryDreamGlitch(server);
+        }
+    }
+
+    private static void tryJoinEcho(MinecraftServer server) {
+        // placeholder
+    }
+
+    private static void tryDistantTorch(MinecraftServer server) {
+        DistantTorchEvent.tick(server);
+    }
+
+    private static void tryDreamGlitch(MinecraftServer server) {
+        // placeholder
     }
 }

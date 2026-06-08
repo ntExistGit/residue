@@ -1,42 +1,71 @@
 package com.upphorattexistera.residuemod.observer;
 
+import com.upphorattexistera.residuemod.WorldState;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.chat.Component;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 public class ObserverManager {
 
     private static ObserverDatabase database;
 
-    public static void load(MinecraftServer server) {
+    public static void setDatabase(ObserverDatabase db) {
+        database = db;
+    }
 
-        database =
-                ObserverDataLoader.load(server);
+    public static void tick(MinecraftServer server) {
+
+        if (database == null) return;
+
+        if (WorldState.activeObserver != null) return;
+
+        assignObserver(server);
+    }
+
+    public static void assignObserver(MinecraftServer server) {
+
+        Observer observer =
+                database.observers.stream()
+                        .filter(o -> !o.isUsed())
+                        .findFirst()
+                        .orElse(null);
+
+        if (observer == null) return;
+
+        observer.setUsed(true);
+        WorldState.activeObserver = observer;
+
+        server.getPlayerList().broadcastSystemMessage(
+                Component.translatable(
+                        "multiplayer.player.joined",
+                        observer.getName()
+                ),
+                false
+        );
+    }
+
+    public static void clearObserver() {
+        WorldState.activeObserver = null;
     }
 
     public static List<Observer> getAll() {
-
-        return database.observers;
+        return database == null ? List.of() : database.observers;
     }
 
-    public static Optional<Observer> getStrongestUnusedObserver() {
+    public static Observer getStrongestUnusedObserver() {
 
-        return database.observers
-                .stream()
-                .filter(observer -> !observer.isUsed())
-                .max(
-                        Comparator.comparingInt(
-                                Observer::getWeight
-                        )
-                );
+        if (database == null) return null;
+
+        return database.observers.stream()
+                .filter(o -> !o.isUsed())
+                .findFirst()
+                .orElse(null);
     }
 
-    public static void markUsed(
-            Observer observer
-    ) {
-
-        observer.setUsed(true);
+    public static void markUsed(Observer observer) {
+        if (observer != null) {
+            observer.setUsed(true);
+        }
     }
 }

@@ -6,20 +6,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.Optional;
-
 public class ObserverJoinEvent {
 
     public static void trigger(MinecraftServer server) {
 
-        Optional<Observer> optional =
-                ObserverManager.getStrongestUnusedObserver();
+        Observer observer = ObserverManager.getStrongestUnusedObserver();
 
-        if (optional.isEmpty()) {
+        if (observer == null) {
             return;
         }
-
-        Observer observer = optional.get();
 
         server.getPlayerList().broadcastSystemMessage(
                 Component.translatable(

@@ -1,95 +1,60 @@
 package com.upphorattexistera.residuemod.memory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import net.fabricmc.loader.api.FabricLoader;
+import com.upphorattexistera.residuemod.WorldState;
+import net.minecraft.server.MinecraftServer;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryManager {
 
-    private static final Gson GSON =
-            new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create();
+    // временное хранилище по игрокам
+    private static final ConcurrentHashMap<UUID, Integer> playerMemory = new ConcurrentHashMap<>();
 
-    private static final Path FILE =
-            FabricLoader.getInstance()
-                    .getConfigDir()
-                    .resolve("residue.json");
+    private static int globalMemory = 0;
 
-    private static ResidueData data;
+    public static void tick(MinecraftServer server) {
 
-    public static void load() {
+        // базовый рост памяти от времени
+        globalMemory++;
 
-        try {
+        // пример: если игроки есть онлайн — память растёт быстрее
+        int online = server.getPlayerCount();
 
-            if (Files.exists(FILE)) {
-
-                data = GSON.fromJson(
-                        Files.readString(FILE),
-                        ResidueData.class
-                );
-
-            } else {
-
-                data = new ResidueData();
-                save();
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            data = new ResidueData();
+        if (online == 1) {
+            globalMemory += 1;
+        } else if (online > 1) {
+            globalMemory += 2;
         }
-    }
 
-    public static void save() {
-
-        try {
-
-            Files.writeString(
-                    FILE,
-                    GSON.toJson(data)
-            );
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
+        // нормализация (чтобы не улетало в бесконечность)
+        if (globalMemory > 1000) {
+            globalMemory = 1000;
         }
+
+        WorldState.memory = globalMemory;
     }
 
     public static int getMemory() {
-        return data.memory;
+        return globalMemory;
     }
 
     public static int getAttention() {
-        return data.attention;
+        return 0;
     }
 
     public static void addMemory(int amount) {
+        globalMemory += amount;
 
-        data.memory += amount;
-        save();
+        if (globalMemory < 0) globalMemory = 0;
+        if (globalMemory > 1000) globalMemory = 1000;
+
+        WorldState.memory = globalMemory;
     }
 
-    public static void addAttention(int amount) {
-
-        data.attention += amount;
-        save();
-    }
-
-    public static void setMemory(int value) {
-
-        data.memory = value;
-        save();
-    }
-
-    public static void setAttention(int value) {
-
-        data.attention = value;
-        save();
+    public static void reset() {
+        globalMemory = 0;
+        playerMemory.clear();
+        WorldState.memory = 0;
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.server.packs.resources.Resource;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class ObserverDataLoader {
@@ -56,7 +57,7 @@ public class ObserverDataLoader {
                 }
 
                 if (database.observers == null) {
-                    database.observers.clear();
+                    database.observers = new ArrayList<>();
                 }
 
                 return database;
