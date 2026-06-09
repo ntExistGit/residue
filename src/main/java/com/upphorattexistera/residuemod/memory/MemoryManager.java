@@ -28,7 +28,9 @@ public class MemoryManager {
             delta += 2;
         }
 
-        int updated = globalMemory.updateAndGet(current -> Math.min(current + delta, max));
+        final int finalDelta = delta;
+
+        int updated = globalMemory.updateAndGet(current -> Math.min(current + finalDelta, max));
 
         WorldState.memory = updated;
     }

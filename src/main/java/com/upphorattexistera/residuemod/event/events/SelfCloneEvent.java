@@ -3,7 +3,7 @@ package com.upphorattexistera.residuemod.event.events;
 import com.upphorattexistera.residuemod.WorldState;
 import com.upphorattexistera.residuemod.config.ResidueConfig;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Random;
 
@@ -26,7 +26,7 @@ public class SelfCloneEvent {
             return;
         }
 
-        ServerPlayer player = server.getPlayerList().getPlayers().stream()
+        ServerPlayerEntity player = server.getPlayerManager().getPlayerList().stream()
                 .findFirst()
                 .orElse(null);
 
@@ -39,7 +39,7 @@ public class SelfCloneEvent {
         nextTriggerTick = now + (long) ResidueConfig.INSTANCE.selfCloneCooldownSeconds * TICKS_PER_SECOND;
     }
 
-    private static void spawnClone(ServerPlayer player) {
+    private static void spawnClone(ServerPlayerEntity player) {
         System.out.println(
                 "[RESIDUE] Clone spotted near "
                         + player.getName().getString()

@@ -1,6 +1,6 @@
 package com.upphorattexistera.residuemod.event.events;
 
-import com.upphorattexistera.residuemod.WorldState;
+import com.upphorattexistera.residuemod.observer.ObserverSessionManager;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
@@ -23,7 +23,7 @@ public class DistantTorchEvent {
 
     public static void tick(MinecraftServer server) {
 
-        if (WorldState.activeObserver == null) return;
+        if (!ObserverSessionManager.hasObserver()) return;
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
 
