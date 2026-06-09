@@ -1,38 +1,40 @@
 package com.upphorattexistera.residuemod.memory;
 
 import com.upphorattexistera.residuemod.WorldState;
+import com.upphorattexistera.residuemod.config.ResidueConfig;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryManager {
 
     private static final ConcurrentHashMap<UUID, Integer> playerMemory = new ConcurrentHashMap<>();
 
-    private static int globalMemory = 0;
+    private static final AtomicInteger globalMemory = new AtomicInteger(0);
 
     public static void tick(MinecraftServer server) {
 
-        globalMemory++;
+        int max = ResidueConfig.INSTANCE.maxMemory;
+
+        int delta = 1;
 
         int online = server.getPlayerManager().getCurrentPlayerCount();
 
         if (online == 1) {
-            globalMemory += 1;
+            delta += 1;
         } else if (online > 1) {
-            globalMemory += 2;
+            delta += 2;
         }
 
-        if (globalMemory > 1000) {
-            globalMemory = 1000;
-        }
+        int updated = globalMemory.updateAndGet(current -> Math.min(current + delta, max));
 
-        WorldState.memory = globalMemory;
+        WorldState.memory = updated;
     }
 
     public static int getMemory() {
-        return globalMemory;
+        return globalMemory.get();
     }
 
     public static int getAttention() {
@@ -40,16 +42,21 @@ public class MemoryManager {
     }
 
     public static void addMemory(int amount) {
-        globalMemory += amount;
 
-        if (globalMemory < 0) globalMemory = 0;
-        if (globalMemory > 1000) globalMemory = 1000;
+        int max = ResidueConfig.INSTANCE.maxMemory;
 
-        WorldState.memory = globalMemory;
+        int updated = globalMemory.updateAndGet(current -> {
+            int next = current + amount;
+            if (next < 0) return 0;
+            if (next > max) return max;
+            return next;
+        });
+
+        WorldState.memory = updated;
     }
 
     public static void reset() {
-        globalMemory = 0;
+        globalMemory.set(0);
         playerMemory.clear();
         WorldState.memory = 0;
     }

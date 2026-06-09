@@ -1,5 +1,6 @@
 package com.upphorattexistera.residuemod.event.events;
 
+import com.upphorattexistera.residuemod.WorldState;
 import com.upphorattexistera.residuemod.config.ResidueConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,7 +9,9 @@ import java.util.Random;
 
 public class SelfCloneEvent {
 
-    private static long nextTrigger = 0L;
+    private static final int TICKS_PER_SECOND = 20;
+
+    private static long nextTriggerTick = 0L;
     private static final Random RANDOM = new Random();
 
     public static void tick(MinecraftServer server) {
@@ -17,9 +20,9 @@ public class SelfCloneEvent {
             return;
         }
 
-        long now = System.currentTimeMillis();
+        long now = WorldState.ticks;
 
-        if (now < nextTrigger) {
+        if (now < nextTriggerTick) {
             return;
         }
 
@@ -33,15 +36,10 @@ public class SelfCloneEvent {
 
         spawnClone(player);
 
-        nextTrigger =
-                now +
-                        ResidueConfig.INSTANCE.selfCloneCooldownSeconds * 1000L;
+        nextTriggerTick = now + (long) ResidueConfig.INSTANCE.selfCloneCooldownSeconds * TICKS_PER_SECOND;
     }
 
     private static void spawnClone(ServerPlayer player) {
-
-        // Пока только лог
-
         System.out.println(
                 "[RESIDUE] Clone spotted near "
                         + player.getName().getString()

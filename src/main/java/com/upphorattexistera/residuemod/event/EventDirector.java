@@ -1,6 +1,7 @@
 package com.upphorattexistera.residuemod.event;
 
-import com.upphorattexistera.residuemod.WorldState;
+import com.upphorattexistera.residuemod.memory.MemoryManager;
+import com.upphorattexistera.residuemod.observer.ObserverSessionManager;
 import com.upphorattexistera.residuemod.event.events.DistantTorchEvent;
 import com.upphorattexistera.residuemod.event.events.SelfCloneEvent;
 import net.minecraft.server.MinecraftServer;
@@ -9,26 +10,27 @@ public class EventDirector {
 
     public static void tick(MinecraftServer server) {
 
-        int memory = WorldState.memory;
+        if (!ObserverSessionManager.hasObserver()) return;
 
-        if (WorldState.activeObserver == null) return;
+        int memory = MemoryManager.getMemory();
 
-        // stage 1
+        // stage 1: 20–40 — редкие сомнительные события
         if (memory > 20 && memory < 40) {
             tryJoinEcho(server);
         }
 
-        // stage 2
+        // stage 2: 40–60 — наблюдатели начинают проявляться
         if (memory >= 40 && memory < 60) {
             tryDistantTorch(server);
         }
 
+        // stage 3: 60–80 — явные нарушения реальности
         if (memory >= 60 && memory < 80) {
             SelfCloneEvent.tick(server);
         }
 
-        // stage 3
-        if (memory >= 60) {
+        // stage 4: 80–100 — критические события, сны, сильные аномалии
+        if (memory >= 80) {
             tryDreamGlitch(server);
         }
     }

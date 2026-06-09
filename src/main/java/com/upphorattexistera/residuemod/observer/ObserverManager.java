@@ -6,10 +6,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.List;
+import java.util.Random;
 
 public class ObserverManager {
 
     private static ObserverDatabase database;
+    private static final Random RANDOM = new Random();
 
     public static void setDatabase(ObserverDatabase db) {
         database = db;
@@ -19,23 +21,20 @@ public class ObserverManager {
 
         if (database == null) return;
 
-        if (WorldState.activeObserver != null) return;
+        if (ObserverSessionManager.hasObserver()) return;
 
         assignObserver(server);
     }
 
     public static void assignObserver(MinecraftServer server) {
 
-        Observer observer =
-                database.observers.stream()
-                        .filter(o -> !o.isUsed())
-                        .findFirst()
-                        .orElse(null);
+        Observer observer = pickByWeight();
 
         if (observer == null) return;
 
         observer.setUsed(true);
-        WorldState.activeObserver = observer;
+
+        ObserverSessionManager.assignObserver(observer, WorldState.ticks);
 
         server.getPlayerManager().broadcast(
                 Text.translatable(
@@ -47,7 +46,7 @@ public class ObserverManager {
     }
 
     public static void clearObserver() {
-        WorldState.activeObserver = null;
+        ObserverSessionManager.clear();
     }
 
     public static List<Observer> getAll() {
@@ -60,7 +59,7 @@ public class ObserverManager {
 
         return database.observers.stream()
                 .filter(o -> !o.isUsed())
-                .findFirst()
+                .max((a, b) -> Integer.compare(a.getWeight(), b.getWeight()))
                 .orElse(null);
     }
 
@@ -68,5 +67,38 @@ public class ObserverManager {
         if (observer != null) {
             observer.setUsed(true);
         }
+    }
+
+    /**
+     * Взвешенный случайный выбор из неиспользованных наблюдателей.
+     * Наблюдатели с большим weight выпадают чаще.
+     */
+    private static Observer pickByWeight() {
+
+        if (database == null) return null;
+
+        List<Observer> unused = database.observers.stream()
+                .filter(o -> !o.isUsed())
+                .toList();
+
+        if (unused.isEmpty()) return null;
+
+        int totalWeight = unused.stream()
+                .mapToInt(Observer::getWeight)
+                .sum();
+
+        if (totalWeight <= 0) return unused.get(0);
+
+        int roll = RANDOM.nextInt(totalWeight);
+        int cumulative = 0;
+
+        for (Observer o : unused) {
+            cumulative += o.getWeight();
+            if (roll < cumulative) {
+                return o;
+            }
+        }
+
+        return unused.get(unused.size() - 1);
     }
 }

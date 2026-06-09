@@ -72,26 +72,38 @@ public class ResidueConfigSerializer {
 
         ResidueConfig cfg = ResidueConfig.INSTANCE;
 
+        // General
         cfg.enableMod = loaded.enableMod;
         cfg.debugMode = loaded.debugMode;
 
+        // Memory
         cfg.memoryIncreaseSeconds = loaded.memoryIncreaseSeconds;
         cfg.maxMemory = loaded.maxMemory;
 
+        // Observer
         cfg.observerSystemEnabled = loaded.observerSystemEnabled;
         cfg.observerJoinMinMinutes = loaded.observerJoinMinMinutes;
         cfg.observerJoinMaxMinutes = loaded.observerJoinMaxMinutes;
 
+        // Events
         cfg.enableDreamEvent = loaded.enableDreamEvent;
         cfg.enableDistantTorchEvent = loaded.enableDistantTorchEvent;
         cfg.enableSelfCloneEvent = loaded.enableSelfCloneEvent;
 
+        // Voice Chat
         cfg.enableVoiceChatIntegration = loaded.enableVoiceChatIntegration;
         cfg.voiceAttentionMultiplier = loaded.voiceAttentionMultiplier;
 
+        // Twitch
         cfg.enableTwitchIntegration = loaded.enableTwitchIntegration;
         cfg.twitchChannel = loaded.twitchChannel;
 
+        // Fake LAN
         cfg.enableFakeLanOpen = loaded.enableFakeLanOpen;
+
+        // Self Clone
+        cfg.selfCloneMinDistance = loaded.selfCloneMinDistance;
+        cfg.selfCloneMaxDistance = loaded.selfCloneMaxDistance;
+        cfg.selfCloneCooldownSeconds = loaded.selfCloneCooldownSeconds;
     }
 }
