@@ -2,7 +2,8 @@ package com.upphorattexistera.residuemod.observer;
 
 import com.upphorattexistera.residuemod.WorldState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 
@@ -36,11 +37,11 @@ public class ObserverManager {
         observer.setUsed(true);
         WorldState.activeObserver = observer;
 
-        server.getPlayerList().broadcastSystemMessage(
-                Component.translatable(
+        server.getPlayerManager().broadcast(
+                Text.translatable(
                         "multiplayer.player.joined",
                         observer.getName()
-                ),
+                ).formatted(Formatting.YELLOW),
                 false
         );
     }

@@ -1,0 +1,17 @@
+{
+  "residue.config.title": "Residue",
+
+  "residue.config.general": "General",
+  "residue.config.memory": "Memory",
+  "residue.config.events": "Events",
+
+  "residue.config.enable_mod": "Enable Mod",
+  "residue.config.debug": "Debug Mode",
+
+  "residue.config.memory_seconds": "Memory Increase Seconds",
+  "residue.config.max_memory": "Maximum Memory",
+
+  "residue.config.dream": "Dream Event",
+  "residue.config.torch": "Distant Torch Event",
+  "residue.config.clone": "Self Clone Event"
+}

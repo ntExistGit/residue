@@ -2,6 +2,7 @@ package com.upphorattexistera.residuemod.event;
 
 import com.upphorattexistera.residuemod.WorldState;
 import com.upphorattexistera.residuemod.event.events.DistantTorchEvent;
+import com.upphorattexistera.residuemod.event.events.SelfCloneEvent;
 import net.minecraft.server.MinecraftServer;
 
 public class EventDirector {
@@ -20,6 +21,10 @@ public class EventDirector {
         // stage 2
         if (memory >= 40 && memory < 60) {
             tryDistantTorch(server);
+        }
+
+        if (memory >= 60 && memory < 80) {
+            SelfCloneEvent.tick(server);
         }
 
         // stage 3

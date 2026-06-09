@@ -1,16 +1,16 @@
 package com.upphorattexistera.residuemod.event.events;
 
 import com.upphorattexistera.residuemod.WorldState;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,44 +25,47 @@ public class DistantTorchEvent {
 
         if (WorldState.activeObserver == null) return;
 
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
 
-            ServerLevel level = player.level();
+            ServerWorld world = player.getEntityWorld();
 
             if (Math.random() < 0.0005) {
-                spawnTorch(level, player);
+                spawnTorch(world, player);
             }
         }
 
         updateTorches(server);
     }
 
-    private static void spawnTorch(ServerLevel level, ServerPlayer player) {
+    private static void spawnTorch(ServerWorld world, ServerPlayerEntity player) {
 
-        Vec3 look = player.getLookAngle();
+        Vec3d look = player.getRotationVector();
 
         double distance = 120 + Math.random() * 80;
 
-        Vec3 pos = player.position().add(
+        Vec3d pos = player.getEntityPos().add(
                 look.x * distance,
                 2,
                 look.z * distance
         );
 
         ItemEntity torch = new ItemEntity(
-                level,
+                world,
                 pos.x,
                 pos.y,
                 pos.z,
-                Items.TORCH.getDefaultInstance()
+                Items.TORCH.getDefaultStack(),
+                0,
+                0,
+                0
         );
 
         torch.setNoGravity(true);
-        level.addFreshEntity(torch);
+        world.spawnEntity(torch);
 
         torches.put(
-                torch.getUUID(),
-                new FakeTorch(level.dimension().identifier().toString())
+                torch.getUuid(),
+                new FakeTorch(world.getRegistryKey().getValue().toString())
         );
     }
 
@@ -77,13 +80,13 @@ public class DistantTorchEvent {
 
             data.life++;
 
-            ServerLevel level = getLevel(server, data.dimension);
-            if (level == null) {
+            ServerWorld world = getWorld(server, data.dimension);
+            if (world == null) {
                 it.remove();
                 continue;
             }
 
-            ItemEntity entity = findEntity(level, entry.getKey());
+            ItemEntity entity = findEntity(world, entry.getKey());
 
             if (data.life > 600 || entity == null) {
                 if (entity != null) {
@@ -93,8 +96,8 @@ public class DistantTorchEvent {
                 continue;
             }
 
-            for (ServerPlayer player : level.players()) {
-                if (player.distanceTo(entity) < 6) {
+            for (ServerPlayerEntity player : world.getPlayers()) {
+                if (player.squaredDistanceTo(entity) < 36) {
                     entity.discard();
                     it.remove();
                     break;
@@ -103,19 +106,19 @@ public class DistantTorchEvent {
         }
     }
 
-    private static ServerLevel getLevel(MinecraftServer server, String dimensionId) {
+    private static ServerWorld getWorld(MinecraftServer server, String dimensionId) {
 
-        ResourceKey<Level> key = ResourceKey.create(
-                Registries.DIMENSION,
-                Identifier.parse(dimensionId)
+        RegistryKey<World> key = RegistryKey.of(
+                RegistryKeys.WORLD,
+                Identifier.of(dimensionId)
         );
 
-        return server.getLevel(key);
+        return server.getWorld(key);
     }
 
-    private static ItemEntity findEntity(ServerLevel level, UUID id) {
+    private static ItemEntity findEntity(ServerWorld world, UUID id) {
 
-        if (level.getEntityInAnyDimension(id) instanceof ItemEntity item) {
+        if (world.getEntityAnyDimension(id) instanceof ItemEntity item) {
             return item;
         }
 

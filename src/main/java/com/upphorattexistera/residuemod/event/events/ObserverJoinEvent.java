@@ -2,9 +2,9 @@ package com.upphorattexistera.residuemod.event.events;
 
 import com.upphorattexistera.residuemod.observer.Observer;
 import com.upphorattexistera.residuemod.observer.ObserverManager;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class ObserverJoinEvent {
 
@@ -16,11 +16,11 @@ public class ObserverJoinEvent {
             return;
         }
 
-        server.getPlayerList().broadcastSystemMessage(
-                Component.translatable(
+        server.getPlayerManager().broadcast(
+                Text.translatable(
                         "multiplayer.player.joined",
                         observer.getName()
-                ).withStyle(ChatFormatting.YELLOW),
+                ).formatted(Formatting.YELLOW),
                 false
         );
 

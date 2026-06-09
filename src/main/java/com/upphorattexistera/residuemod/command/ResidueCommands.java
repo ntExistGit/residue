@@ -3,26 +3,26 @@ package com.upphorattexistera.residuemod.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.upphorattexistera.residuemod.memory.MemoryManager;
 import com.upphorattexistera.residuemod.observer.ObserverManager;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 
 public class ResidueCommands {
 
     public static void register(
-            CommandDispatcher<CommandSourceStack> dispatcher
+            CommandDispatcher<ServerCommandSource> dispatcher
     ) {
 
         dispatcher.register(
-                Commands.literal("residue")
+                CommandManager.literal("residue")
 
                         .then(
-                                Commands.literal("memory")
+                                CommandManager.literal("memory")
 
                                         .executes(context -> {
 
-                                            context.getSource().sendSuccess(
-                                                    () -> Component.literal(
+                                            context.getSource().sendFeedback(
+                                                    () -> Text.literal(
                                                             "Memory: "
                                                                     + MemoryManager.getMemory()
                                                                     + " | Attention: "
@@ -35,14 +35,14 @@ public class ResidueCommands {
                                         })
                         )
                         .then(
-                                Commands.literal("observers")
+                                CommandManager.literal("observers")
                                         .executes(context -> {
 
                                             ObserverManager.getAll()
                                                     .forEach(observer ->
 
-                                                            context.getSource().sendSuccess(
-                                                                    () -> Component.literal(
+                                                            context.getSource().sendFeedback(
+                                                                    () -> Text.literal(
                                                                             observer.getName()
                                                                                     + " | weight="
                                                                                     + observer.getWeight()

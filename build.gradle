@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -12,6 +12,10 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+    maven {
+        url = "https://maven.terraformersmc.com/"
+        name = "Terraformers"
+    }
     maven {
         url  "https://chocolateminecraft.com/maven"
         name "Xaero's Maven"
@@ -39,7 +43,8 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
-
+    useIntermediateMappings = true
+    intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar'
 }
 
 fabricApi {
@@ -52,15 +57,18 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    mappings "org.relativitymc:modern-yarn:${project.yarn_mappings}:v2"
+
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-    implementation "xaero.minimap:xaerominimap-fabric-${project.minecraft_version}:${project.xaerominimap}"
-    implementation "xaero.map:xaeroworldmap-fabric-${project.minecraft_version}:${project.xaeroworldmap}"
-    implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    modImplementation "xaero.minimap:xaerominimap-fabric-${project.minecraft_version}:${project.xaerominimap}"
+    modImplementation "xaero.map:xaeroworldmap-fabric-${project.minecraft_version}:${project.xaeroworldmap}"
+    modCompileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 }
 
 processResources {

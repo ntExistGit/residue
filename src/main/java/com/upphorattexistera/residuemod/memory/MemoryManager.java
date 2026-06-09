@@ -8,18 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryManager {
 
-    // временное хранилище по игрокам
     private static final ConcurrentHashMap<UUID, Integer> playerMemory = new ConcurrentHashMap<>();
 
     private static int globalMemory = 0;
 
     public static void tick(MinecraftServer server) {
 
-        // базовый рост памяти от времени
         globalMemory++;
 
-        // пример: если игроки есть онлайн — память растёт быстрее
-        int online = server.getPlayerCount();
+        int online = server.getPlayerManager().getCurrentPlayerCount();
 
         if (online == 1) {
             globalMemory += 1;
@@ -27,7 +24,6 @@ public class MemoryManager {
             globalMemory += 2;
         }
 
-        // нормализация (чтобы не улетало в бесконечность)
         if (globalMemory > 1000) {
             globalMemory = 1000;
         }

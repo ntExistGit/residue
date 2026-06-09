@@ -24,6 +24,9 @@
 		"fabric-datagen": [
 			"com.upphorattexistera.residuemod.client.ResidueDataGenerator"
 		],
+        "modmenu": [
+            "com.upphorattexistera.residuemod.client.ModMenuIntegration"
+        ],
       "voicechat": [
             "com.upphorattexistera.residuemod.ResidueVoicechatPlugin"
         ]

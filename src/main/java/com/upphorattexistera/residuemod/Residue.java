@@ -1,6 +1,7 @@
 package com.upphorattexistera.residuemod;
 
 import com.upphorattexistera.residuemod.command.ResidueCommands;
+import com.upphorattexistera.residuemod.config.ResidueConfigSerializer;
 import com.upphorattexistera.residuemod.observer.ObserverDataLoader;
 import com.upphorattexistera.residuemod.observer.ObserverManager;
 import net.fabricmc.api.ModInitializer;
@@ -17,6 +18,8 @@ public class Residue implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
+        ResidueConfigSerializer.load();
 
         ServerTickEvents.END_SERVER_TICK.register(
                 ResidueTickHandler::tick
