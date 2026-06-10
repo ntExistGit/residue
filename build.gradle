@@ -29,8 +29,16 @@ repositories {
         name 'Xander Maven'
     }
     maven {
-        url = 'https://maven.maxhenkel.de/repository/public'
-        name = "Max Henkel Maven"
+        url 'https://maven.maxhenkel.de/repository/public'
+        name "Max Henkel Maven"
+    }
+    maven {
+        url "https://cursemaven.com"
+        name "Curse Maven"
+    }
+    maven {
+        url "https://api.modrinth.com/maven"
+        name "Modrinth"
     }
 }
 
@@ -68,7 +76,8 @@ dependencies {
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     modImplementation "xaero.minimap:xaerominimap-fabric-${project.minecraft_version}:${project.xaerominimap}"
     modImplementation "xaero.map:xaeroworldmap-fabric-${project.minecraft_version}:${project.xaeroworldmap}"
-    modCompileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    modImplementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    modImplementation "maven.modrinth:sway:1.0.0-fabric+26.1.2"
 }
 
 processResources {

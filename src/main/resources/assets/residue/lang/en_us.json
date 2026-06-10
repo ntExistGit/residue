@@ -1,9 +1,13 @@
 {
   "residue.config.title": "Residue",
 
+  "residue.config.enable": "Enable",
+  "residue.config.disable": "Disable",
+
   "residue.config.general": "General",
   "residue.config.memory": "Memory",
   "residue.config.events": "Events",
+  "residue.config.visual": "Visual",
 
   "residue.config.enable_mod": "Enable Mod",
   "residue.config.debug": "Debug Mode",
@@ -13,5 +17,20 @@
 
   "residue.config.dream": "Dream Event",
   "residue.config.torch": "Distant Torch Event",
-  "residue.config.clone": "Self Clone Event"
+  "residue.config.clone": "Self Clone Event",
+
+  "residue.config.foliage": "Foliage",
+  "residue.config.enableFoliage.tooltip": "Enables dynamic bending of grass, leaves and crops when entities pass through them.",
+  "residue.config.pushRadiusFoliage": "Push Radius",
+  "residue.config.pushRadiusFoliage.tooltip": "How far the foliage reacts to entities (blocks)",
+  "residue.config.maxPushStrengthFoliage": "Maximum Push Strength",
+  "residue.config.maxPushStrengthFoliage.tooltip": "How strongly the foliage bends (0.0 - 1.0)",
+  "residue.config.returnSpeedFoliage": "Return Speed",
+  "residue.config.returnSpeedFoliage.tooltip": "How fast the foliage returns to its original position",
+  "residue.config.affectLeavesFoliage": "Affect Leaves",
+  "residue.config.affectLeavesFoliage.tooltip": "Make tree leaves react",
+  "residue.config.affectGrassFoliage": "Affect Grass & Tall Grass",
+  "residue.config.affectGrassFoliage.tooltip": "Make grass and tall grass react",
+  "residue.config.affectCropsFoliage": "Affect Crops",
+  "residue.config.affectCropsFoliage.tooltip": "Make wheat, carrots and other crops react"
 }

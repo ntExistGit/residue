@@ -18,19 +18,19 @@ public class MemoryManager {
 
         int max = ResidueConfig.INSTANCE.maxMemory;
 
-        int delta = 1;
-
         int online = server.getPlayerManager().getCurrentPlayerCount();
 
+        final int delta;
+
         if (online == 1) {
-            delta += 1;
+            delta = 2;
         } else if (online > 1) {
-            delta += 2;
+            delta = 3;
+        } else {
+            delta = 1;
         }
 
-        final int finalDelta = delta;
-
-        int updated = globalMemory.updateAndGet(current -> Math.min(current + finalDelta, max));
+        int updated = globalMemory.updateAndGet(current -> Math.min(current + delta, max));
 
         WorldState.memory = updated;
     }

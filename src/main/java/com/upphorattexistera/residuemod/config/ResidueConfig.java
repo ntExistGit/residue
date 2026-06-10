@@ -45,5 +45,4 @@ public class ResidueConfig {
     public int selfCloneMinDistance = 40;
     public int selfCloneMaxDistance = 80;
     public int selfCloneCooldownSeconds = 300;
-
 }
