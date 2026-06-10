@@ -9,5 +9,6 @@ public class ResidueClient implements ClientModInitializer {
         if (FabricLoader.getInstance().isModLoaded("sway")) {
             SwayCompatLoader.register();
         }
+        ResidueDebugHud.register();
     }
 }

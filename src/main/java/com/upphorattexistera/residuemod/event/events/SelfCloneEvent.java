@@ -4,6 +4,7 @@ import com.upphorattexistera.residuemod.WorldState;
 import com.upphorattexistera.residuemod.config.ResidueConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 
 import java.util.Random;
 
@@ -40,9 +41,17 @@ public class SelfCloneEvent {
     }
 
     private static void spawnClone(ServerPlayerEntity player) {
+
+        ServerWorld world = player.getEntityWorld();
+        boolean isNight = world.getLevelProperties().getTime() % 24000 > 13000;
+
+        // placeholder — в будущем заменить на настоящий визуальный двойник
         System.out.println(
                 "[RESIDUE] Clone spotted near "
                         + player.getName().getString()
+                        + (isNight ? " (carrying torch)" : "")
         );
+
+        // TODO: заспавнить визуальную сущность с факелом в левой руке если isNight
     }
 }

@@ -1,5 +1,6 @@
 package com.upphorattexistera.residuemod.event;
 
+import com.upphorattexistera.residuemod.config.ResidueConfig;
 import com.upphorattexistera.residuemod.memory.MemoryManager;
 import com.upphorattexistera.residuemod.observer.ObserverSessionManager;
 import com.upphorattexistera.residuemod.event.events.DistantTorchEvent;
@@ -13,24 +14,26 @@ public class EventDirector {
         if (!ObserverSessionManager.hasObserver()) return;
 
         int memory = MemoryManager.getMemory();
+        int max = ResidueConfig.INSTANCE.maxMemory;
 
-        // stage 1: 20–40 — редкие сомнительные события
-        if (memory > 20 && memory < 40) {
+        int s1start = (int) (max * 0.20);
+        int s2start = (int) (max * 0.40);
+        int s3start = (int) (max * 0.60);
+        int s4start = (int) (max * 0.80);
+
+        if (memory > s1start && memory < s2start) {
             tryJoinEcho(server);
         }
 
-        // stage 2: 40–60 — наблюдатели начинают проявляться
-        if (memory >= 40 && memory < 60) {
+        if (memory >= s2start && memory < s3start) {
             tryDistantTorch(server);
         }
 
-        // stage 3: 60–80 — явные нарушения реальности
-        if (memory >= 60 && memory < 80) {
+        if (memory >= s3start && memory < s4start) {
             SelfCloneEvent.tick(server);
         }
 
-        // stage 4: 80–100 — критические события, сны, сильные аномалии
-        if (memory >= 80) {
+        if (memory >= s4start) {
             tryDreamGlitch(server);
         }
     }

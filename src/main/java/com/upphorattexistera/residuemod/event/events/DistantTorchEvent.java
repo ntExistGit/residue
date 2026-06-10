@@ -1,104 +1,159 @@
 package com.upphorattexistera.residuemod.event.events;
 
+import com.upphorattexistera.residuemod.Residue;
+import com.upphorattexistera.residuemod.config.ResidueConfig;
 import com.upphorattexistera.residuemod.observer.ObserverSessionManager;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Items;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Random;
 
 public class DistantTorchEvent {
 
-    private static final Map<UUID, FakeTorch> torches = new HashMap<>();
+    private static final Map<BlockPos, TorchData> torches = new HashMap<>();
+    private static final Random RANDOM = new Random();
+    private static final int TICKS_PER_SECOND = 20;
 
     public static void tick(MinecraftServer server) {
 
-        if (!ObserverSessionManager.hasObserver()) return;
+        if (!ObserverSessionManager.hasObserver()) {
+            Residue.LOGGER.info("[Torch] no observer, skip");
+            return;
+        }
+        if (!ResidueConfig.INSTANCE.enableDistantTorchEvent) {
+            Residue.LOGGER.info("[Torch] disabled, skip");
+            return;
+        }
+        if (torches.size() >= ResidueConfig.INSTANCE.torchMaxActive) {
+            Residue.LOGGER.info("[Torch] max active reached ({}), skip", torches.size());
+            return;
+        }
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-
-            ServerWorld world = player.getEntityWorld();
-
-            if (Math.random() < 0.0005) {
-                spawnTorch(world, player);
+            double chance = ResidueConfig.INSTANCE.torchSpawnChance / 100000.0;
+            if (RANDOM.nextDouble() < chance) {
+                trySpawnTorch(player.getEntityWorld(), player);
             }
         }
 
         updateTorches(server);
     }
 
-    private static void spawnTorch(ServerWorld world, ServerPlayerEntity player) {
+    private static void trySpawnTorch(ServerWorld world, ServerPlayerEntity player) {
+
+        ResidueConfig cfg = ResidueConfig.INSTANCE;
+
+        double distance = cfg.torchMinDistance + RANDOM.nextDouble() * (cfg.torchMaxDistance - cfg.torchMinDistance);
 
         Vec3d look = player.getRotationVector();
+        Vec3d origin = player.getEntityPos();
 
-        double distance = 120 + Math.random() * 80;
+        Vec3d horizontal = origin.add(look.x * distance, 0, look.z * distance);
 
-        Vec3d pos = player.getEntityPos().add(
-                look.x * distance,
-                2,
-                look.z * distance
+        BlockPos targetPos;
+
+        if (isUnderground(world, player)) {
+            targetPos = findCaveSurface(world, origin, look, distance);
+        } else {
+            BlockPos surface = world.getTopPosition(
+                    Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                    new BlockPos((int) horizontal.x, 0, (int) horizontal.z)
+            );
+            targetPos = surface;
+        }
+
+        if (targetPos == null) return;
+
+        if (!world.getBlockState(targetPos).isAir()) return;
+        if (!world.getBlockState(targetPos.down()).isSolidBlock(world, targetPos.down())) return;
+
+        TorchData data = new TorchData(
+                world.getRegistryKey().getValue().toString(),
+                cfg.torchDespawnSeconds * TICKS_PER_SECOND
         );
 
-        ItemEntity torch = new ItemEntity(
-                world,
-                pos.x,
-                pos.y,
-                pos.z,
-                Items.TORCH.getDefaultStack(),
-                0,
-                0,
-                0
-        );
+        world.setBlockState(targetPos, Blocks.TORCH.getDefaultState());
+        torches.put(targetPos, data);
 
-        torch.setNoGravity(true);
-        world.spawnEntity(torch);
+        Residue.LOGGER.info("[Residue] Torch spawned at x={} y={} z={} dim={}",
+                targetPos.getX(), targetPos.getY(), targetPos.getZ(), data.dimension);
+    }
 
-        torches.put(
-                torch.getUuid(),
-                new FakeTorch(world.getRegistryKey().getValue().toString())
-        );
+    private static boolean isUnderground(ServerWorld world, ServerPlayerEntity player) {
+        BlockPos pos = player.getBlockPos();
+        for (int dy = 1; dy <= 5; dy++) {
+            if (world.getBlockState(pos.up(dy)).isSolidBlock(world, pos.up(dy))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static BlockPos findCaveSurface(ServerWorld world, Vec3d origin, Vec3d look, double distance) {
+        for (double d = distance * 0.8; d <= distance; d += 1.0) {
+            BlockPos candidate = new BlockPos(
+                    (int) (origin.x + look.x * d),
+                    (int) (origin.y + look.y * d),
+                    (int) (origin.z + look.z * d)
+            );
+            BlockPos below = candidate.down();
+            if (world.getBlockState(candidate).isAir() &&
+                    world.getBlockState(below).isSolidBlock(world, below)) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     private static void updateTorches(MinecraftServer server) {
 
-        Iterator<Map.Entry<UUID, FakeTorch>> it = torches.entrySet().iterator();
+        ResidueConfig cfg = ResidueConfig.INSTANCE;
+        double disappearDistSq = cfg.torchDisappearDistance * cfg.torchDisappearDistance;
+
+        Iterator<Map.Entry<BlockPos, TorchData>> it = torches.entrySet().iterator();
 
         while (it.hasNext()) {
 
-            Map.Entry<UUID, FakeTorch> entry = it.next();
-            FakeTorch data = entry.getValue();
+            Map.Entry<BlockPos, TorchData> entry = it.next();
+            BlockPos pos = entry.getKey();
+            TorchData data = entry.getValue();
 
-            data.life++;
+            data.lifeTicks++;
 
             ServerWorld world = getWorld(server, data.dimension);
+
             if (world == null) {
                 it.remove();
                 continue;
             }
 
-            ItemEntity entity = findEntity(world, entry.getKey());
+            if (!world.getBlockState(pos).is(Blocks.TORCH)) {
+                it.remove();
+                continue;
+            }
 
-            if (data.life > 600 || entity == null) {
-                if (entity != null) {
-                    entity.discard();
-                }
+            if (data.lifeTicks >= data.maxLifeTicks) {
+                world.setBlockState(pos, Blocks.AIR.getDefaultState());
                 it.remove();
                 continue;
             }
 
             for (ServerPlayerEntity player : world.getPlayers()) {
-                if (player.squaredDistanceTo(entity) < 36) {
-                    entity.discard();
+                Vec3d torchVec = Vec3d.ofCenter(pos);
+                if (player.getEntityPos().squaredDistanceTo(torchVec) < disappearDistSq) {
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState());
                     it.remove();
                     break;
                 }
@@ -107,31 +162,21 @@ public class DistantTorchEvent {
     }
 
     private static ServerWorld getWorld(MinecraftServer server, String dimensionId) {
-
         RegistryKey<World> key = RegistryKey.of(
                 RegistryKeys.WORLD,
                 Identifier.of(dimensionId)
         );
-
         return server.getWorld(key);
     }
 
-    private static ItemEntity findEntity(ServerWorld world, UUID id) {
-
-        if (world.getEntityAnyDimension(id) instanceof ItemEntity item) {
-            return item;
-        }
-
-        return null;
-    }
-
-    private static class FakeTorch {
-
+    private static class TorchData {
         String dimension;
-        int life = 0;
+        int lifeTicks = 0;
+        int maxLifeTicks;
 
-        FakeTorch(String dimension) {
+        TorchData(String dimension, int maxLifeTicks) {
             this.dimension = dimension;
+            this.maxLifeTicks = maxLifeTicks;
         }
     }
 }

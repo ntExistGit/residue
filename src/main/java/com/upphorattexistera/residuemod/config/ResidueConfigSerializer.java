@@ -101,6 +101,14 @@ public class ResidueConfigSerializer {
         // Fake LAN
         cfg.enableFakeLanOpen = loaded.enableFakeLanOpen;
 
+        // Distant Torch
+        cfg.torchMinDistance = loaded.torchMinDistance;
+        cfg.torchMaxDistance = loaded.torchMaxDistance;
+        cfg.torchDespawnSeconds = loaded.torchDespawnSeconds;
+        cfg.torchDisappearDistance = loaded.torchDisappearDistance;
+        cfg.torchMaxActive = loaded.torchMaxActive;
+        cfg.torchSpawnChance = loaded.torchSpawnChance;
+
         // Self Clone
         cfg.selfCloneMinDistance = loaded.selfCloneMinDistance;
         cfg.selfCloneMaxDistance = loaded.selfCloneMaxDistance;

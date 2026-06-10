@@ -12,7 +12,7 @@ public class ResidueConfig {
     // Memory
 
     public int memoryIncreaseSeconds = 60;
-    public int maxMemory = 100;
+    public int maxMemory = 1000;
 
     // Observer
 
@@ -40,8 +40,15 @@ public class ResidueConfig {
 
     public boolean enableFakeLanOpen = true;
 
-    // Self Clone
+    // Distant Torch
+    public int torchMinDistance = 80;
+    public int torchMaxDistance = 200;
+    public int torchDespawnSeconds = 30;
+    public double torchDisappearDistance = 6.0;
+    public int torchMaxActive = 3;
+    public int torchSpawnChance = 5;
 
+    // Self Clone
     public int selfCloneMinDistance = 40;
     public int selfCloneMaxDistance = 80;
     public int selfCloneCooldownSeconds = 300;

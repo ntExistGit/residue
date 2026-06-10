@@ -2,6 +2,7 @@ package com.upphorattexistera.residuemod;
 
 import com.upphorattexistera.residuemod.command.ResidueCommands;
 import com.upphorattexistera.residuemod.config.ResidueConfigSerializer;
+import com.upphorattexistera.residuemod.memory.MemoryManager;
 import com.upphorattexistera.residuemod.observer.ObserverDataLoader;
 import com.upphorattexistera.residuemod.observer.ObserverManager;
 import net.fabricmc.api.ModInitializer;
@@ -28,6 +29,11 @@ public class Residue implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             ObserverManager.setDatabase(ObserverDataLoader.load(server));
             LOGGER.info("[Residue] loaded {} observers", ObserverManager.getAll().size());
+            MemoryManager.onServerStarted(server);
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            MemoryManager.onServerStopping();
         });
 
         CommandRegistrationCallback.EVENT.register(
