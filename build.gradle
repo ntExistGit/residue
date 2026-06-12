@@ -72,7 +72,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     modImplementation "xaero.minimap:xaerominimap-fabric-${project.minecraft_version}:${project.xaerominimap}"
     modImplementation "xaero.map:xaeroworldmap-fabric-${project.minecraft_version}:${project.xaeroworldmap}"

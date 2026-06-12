@@ -76,6 +76,12 @@ public class ResidueConfigSerializer {
         cfg.enableMod = loaded.enableMod;
         cfg.debugMode = loaded.debugMode;
 
+        cfg.llmEnable = loaded.llmEnable;
+        cfg.llmBackend  = loaded.llmBackend;
+        cfg.llmModel = loaded.llmModel;
+        cfg.customModelName = loaded.customModelName;
+        cfg.huggingFaceToken = loaded.huggingFaceToken;
+
         // Memory
         cfg.memoryIncreaseSeconds = loaded.memoryIncreaseSeconds;
         cfg.maxMemory = loaded.maxMemory;
@@ -99,7 +105,17 @@ public class ResidueConfigSerializer {
         cfg.twitchChannel = loaded.twitchChannel;
 
         // Fake LAN
-        cfg.enableFakeLanOpen = loaded.enableFakeLanOpen;
+        cfg.enableFakeLanEvent = loaded.enableFakeLanEvent;
+        cfg.fakeLanMinMinutes = loaded.fakeLanMinMinutes;
+        cfg.fakeLanMaxMinutes = loaded.fakeLanMaxMinutes;
+
+        // Observer connection
+        cfg.observerConnectChanceLan = loaded.observerConnectChanceLan;
+        cfg.observerConnectChanceNoLan = loaded.observerConnectChanceNoLan;
+        cfg.observerFlapChance = loaded.observerFlapChance;
+        cfg.observerSessionMinSeconds = loaded.observerSessionMinSeconds;
+        cfg.observerSessionMaxSeconds = loaded.observerSessionMaxSeconds;
+        cfg.observerMaxSimultaneous = loaded.observerMaxSimultaneous;
 
         // Distant Torch
         cfg.torchMinDistance = loaded.torchMinDistance;
@@ -108,10 +124,18 @@ public class ResidueConfigSerializer {
         cfg.torchDisappearDistance = loaded.torchDisappearDistance;
         cfg.torchMaxActive = loaded.torchMaxActive;
         cfg.torchSpawnChance = loaded.torchSpawnChance;
+        cfg.torchMemoryMin = loaded.torchMemoryMin;
+        cfg.torchMemoryMax = loaded.torchMemoryMax;
 
         // Self Clone
         cfg.selfCloneMinDistance = loaded.selfCloneMinDistance;
         cfg.selfCloneMaxDistance = loaded.selfCloneMaxDistance;
         cfg.selfCloneCooldownSeconds = loaded.selfCloneCooldownSeconds;
+        cfg.cloneMemoryMin = loaded.cloneMemoryMin;
+        cfg.cloneMemoryMax = loaded.cloneMemoryMax;
+
+        // Dream
+        cfg.dreamMemoryMin = loaded.dreamMemoryMin;
+        cfg.dreamMemoryMax = loaded.dreamMemoryMax;
     }
 }

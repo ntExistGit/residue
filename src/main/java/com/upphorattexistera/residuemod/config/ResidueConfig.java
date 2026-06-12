@@ -9,6 +9,12 @@ public class ResidueConfig {
     public boolean enableMod = true;
     public boolean debugMode = false;
 
+    public boolean llmEnable = true;
+    public LLMBackend llmBackend = LLMBackend.AUTO;
+    public LLMModel llmModel = LLMModel.QWEN_3B;
+    public String customModelName = "";
+    public String huggingFaceToken = "";
+
     // Memory
 
     public int memoryIncreaseSeconds = 60;
@@ -38,7 +44,17 @@ public class ResidueConfig {
 
     // Fake LAN
 
-    public boolean enableFakeLanOpen = true;
+    public boolean enableFakeLanEvent = true;
+    public int fakeLanMinMinutes = 5;
+    public int fakeLanMaxMinutes = 20;
+
+    // Observer connection
+    public int observerConnectChanceLan = 50;
+    public int observerConnectChanceNoLan = 1;
+    public double observerFlapChance = 20.0;
+    public int observerSessionMinSeconds = 120;
+    public int observerSessionMaxSeconds = 600;
+    public int observerMaxSimultaneous = 2;
 
     // Distant Torch
     public int torchMinDistance = 80;
@@ -47,9 +63,17 @@ public class ResidueConfig {
     public double torchDisappearDistance = 6.0;
     public int torchMaxActive = 3;
     public int torchSpawnChance = 5;
+    public int torchMemoryMin = 40;
+    public int torchMemoryMax = 60;
 
     // Self Clone
     public int selfCloneMinDistance = 40;
     public int selfCloneMaxDistance = 80;
     public int selfCloneCooldownSeconds = 300;
+    public int cloneMemoryMin = 60;
+    public int cloneMemoryMax = 80;
+
+    // Dream
+    public int dreamMemoryMin = 80;
+    public int dreamMemoryMax = 100;
 }

@@ -16,24 +16,20 @@ public class EventDirector {
         int memory = MemoryManager.getMemory();
         int max = ResidueConfig.INSTANCE.maxMemory;
 
-        int s1start = (int) (max * 0.20);
-        int s2start = (int) (max * 0.40);
-        int s3start = (int) (max * 0.60);
-        int s4start = (int) (max * 0.80);
+        float percent = (float) memory / max * 100f;
 
-        if (memory > s1start && memory < s2start) {
-            tryJoinEcho(server);
+        if (percent >= ResidueConfig.INSTANCE.torchMemoryMin
+                && percent <= ResidueConfig.INSTANCE.torchMemoryMax) {
+            DistantTorchEvent.tick(server);
         }
 
-        if (memory >= s2start && memory < s3start) {
-            tryDistantTorch(server);
-        }
-
-        if (memory >= s3start && memory < s4start) {
+        if (percent >= ResidueConfig.INSTANCE.cloneMemoryMin
+                && percent <= ResidueConfig.INSTANCE.cloneMemoryMax) {
             SelfCloneEvent.tick(server);
         }
 
-        if (memory >= s4start) {
+        if (percent >= ResidueConfig.INSTANCE.dreamMemoryMin
+                && percent <= ResidueConfig.INSTANCE.dreamMemoryMax) {
             tryDreamGlitch(server);
         }
     }

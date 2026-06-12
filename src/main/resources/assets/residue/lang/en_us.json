@@ -1,63 +1,109 @@
 {
   "residue.config.title": "Residue",
 
-  "residue.config.enable": "Enable",
-  "residue.config.disable": "Disable",
-
   "residue.config.general": "General",
-  "residue.config.memory": "Memory",
-  "residue.config.events": "Events",
-  "residue.config.visual": "Visual",
-
   "residue.config.enable_mod": "Enable Mod",
   "residue.config.enable_mod.desc": "Completely enables or disables all Residue systems.",
-
   "residue.config.debug": "Debug Mode",
   "residue.config.debug.desc": "Prints internal state (memory, observer, events) to the server log.",
 
-  "residue.config.memory_seconds": "Memory Increase Interval",
-  "residue.config.memory_seconds.desc": "How often (in seconds) memory increases by one step. Lower values make the world deteriorate faster.",
+  "residue.config.events": "Events",
 
-  "residue.config.max_memory": "Maximum Memory",
-  "residue.config.max_memory.desc": "The upper limit of memory. Event stages are calculated as percentages of this value.",
+  "residue.config.clone.label": "— Self Clone —",
+  "residue.config.clone": "Self Clone Event",
+  "residue.config.clone.desc": "Enables the self-clone — a distant copy of the player that disappears before it can be reached.",
+  "residue.config.clone.min_distance": "Min Spawn Distance",
+  "residue.config.clone.min_distance.desc": "Minimum distance (in blocks) at which the clone can appear.",
+  "residue.config.clone.max_distance": "Max Spawn Distance",
+  "residue.config.clone.max_distance.desc": "Maximum distance (in blocks) at which the clone can appear.",
+  "residue.config.clone.cooldown": "Cooldown",
+  "residue.config.clone.cooldown.desc": "Minimum time (in seconds) between two clone appearances.",
 
   "residue.config.dream": "Dream Event",
   "residue.config.dream.desc": "Enables the dream sequence — after sleeping, a segment of gameplay may turn out to have been a dream.",
 
-  "residue.config.torch": "Distant Torch Event",
-  "residue.config.torch.desc": "Enables distant torches that appear in the direction the player is looking and vanish when approached.",
-
-  "residue.config.clone": "Self Clone Event",
-  "residue.config.clone.desc": "Enables the self-clone — a distant copy of the player that disappears before it can be reached.",
+  "residue.config.fake_lan.label": "— Fake LAN —",
+  "residue.config.fake_lan": "Fake LAN Event",
+  "residue.config.fake_lan.desc": "Simulates opening the world to LAN — shows a system message and disables the Open to LAN button.",
+  "residue.config.fake_lan.min_minutes": "Min Delay (minutes)",
+  "residue.config.fake_lan.min_minutes.desc": "Minimum time in minutes before the Fake LAN event triggers.",
+  "residue.config.fake_lan.max_minutes": "Max Delay (minutes)",
+  "residue.config.fake_lan.max_minutes.desc": "Maximum time in minutes before the Fake LAN event triggers.",
 
   "residue.config.torch.label": "— Distant Torch —",
-
+  "residue.config.torch": "Distant Torch Event",
+  "residue.config.torch.desc": "Enables distant torches that appear in the direction the player is looking and vanish when approached.",
   "residue.config.torch.min_distance": "Min Spawn Distance",
   "residue.config.torch.min_distance.desc": "Minimum distance (in blocks) at which a torch can appear.",
-
   "residue.config.torch.max_distance": "Max Spawn Distance",
   "residue.config.torch.max_distance.desc": "Maximum distance (in blocks) at which a torch can appear.",
-
-  "residue.config.torch.despawn_seconds": "Despawn Time",
-  "residue.config.torch.despawn_seconds.desc": "How many seconds the torch stays in the world if the player does not approach it.",
-
   "residue.config.torch.disappear_distance": "Disappear Distance",
   "residue.config.torch.disappear_distance.desc": "How close (in blocks) the player must get before the torch vanishes.",
-
+  "residue.config.torch.despawn_seconds": "Despawn Time",
+  "residue.config.torch.despawn_seconds.desc": "How many seconds the torch stays in the world if the player does not approach it.",
   "residue.config.torch.max_active": "Max Active Torches",
   "residue.config.torch.max_active.desc": "Maximum number of torches that can exist in the world at the same time.",
-
   "residue.config.torch.spawn_chance": "Spawn Chance",
-  "residue.config.torch.spawn_chance.desc": "Spawn probability per tick (value / 100000). Default 5 = 0.00005 per tick, roughly once every 3 minutes.",
+  "residue.config.torch.spawn_chance.desc": "Spawn probability per tick (value / 100000). Default 5 = 0.00005 per tick (~once every 3 minutes).",
+  "residue.config.torch.memory_min": "Memory Min %",
+  "residue.config.torch.memory_min.desc": "Minimum memory percentage at which torches can appear.",
+  "residue.config.torch.memory_max": "Memory Max %",
+  "residue.config.torch.memory_max.desc": "Maximum memory percentage at which torches can appear.",
 
-  "residue.config.clone.label": "— Self Clone —",
+  "residue.config.observer.label": "— Observer —",
+  "residue.config.observer.connect_chance_no_lan": "Connect Chance (no LAN)",
+  "residue.config.observer.connect_chance_no_lan.desc": "Chance of an observer connecting when Fake LAN is not active (value / 100000 per 5 seconds).",
+  "residue.config.observer.connect_chance_lan": "Connect Chance (LAN active)",
+  "residue.config.observer.connect_chance_lan.desc": "Chance of an observer connecting when Fake LAN is active (value / 1000 per 5 seconds).",
+  "residue.config.observer.flap_chance": "Flap Chance",
+  "residue.config.observer.flap_chance.desc": "Percentage chance that a connecting observer will flap (connect/disconnect several times before staying).",
+  "residue.config.observer.session_min": "Min Session Duration",
+  "residue.config.observer.session_min.desc": "Minimum time (in seconds) an observer stays connected.",
+  "residue.config.observer.session_max": "Max Session Duration",
+  "residue.config.observer.session_max.desc": "Maximum time (in seconds) an observer stays connected.",
+  "residue.config.observer.max_simultaneous": "Max Simultaneous",
+  "residue.config.observer.max_simultaneous.desc": "Maximum number of observers that can be connected at the same time.",
 
-  "residue.config.clone.min_distance": "Min Spawn Distance",
-  "residue.config.clone.min_distance.desc": "Minimum distance (in blocks) at which the clone can appear.",
+  "residue.config.memory": "Memory",
+  "residue.config.max_memory": "Maximum Memory",
+  "residue.config.max_memory.desc": "The upper limit of memory. Event stages are calculated as percentages of this value.",
+  "residue.config.memory_seconds": "Memory Increase Interval",
+  "residue.config.memory_seconds.desc": "How often (in seconds) memory increases by one step. Lower values make the world deteriorate faster.",
 
-  "residue.config.clone.max_distance": "Max Spawn Distance",
-  "residue.config.clone.max_distance.desc": "Maximum distance (in blocks) at which the clone can appear.",
+  "residue.config.llama": "AI Settings",
+  "residue.config.llm_enable": "Enable",
+  "residue.config.llm_enable.desc": "",
+  "residue.config.llm_backend": "Hardware Acceleration",
+  "residue.config.llm_backend.desc": "Select the llama.cpp version to download.\n\n§eAUTO§r: Automatically selects Vulkan (if GPU detected) or CPU.\n§eVULKAN§r: Recommended. Works on AMD, Intel, Nvidia.\n§eHIP§r: For AMD only (requires ROCm/HIP SDK).\n§eCUDA§r: For Nvidia GPUs only.\n§eCPU§r: CPU only (slower, universal).",
 
-  "residue.config.clone.cooldown": "Cooldown",
-  "residue.config.clone.cooldown.desc": "Minimum time (in seconds) between two clone appearances."
+  "residue.config.llm_model": "AI Model",
+  "residue.config.llm_model.desc": "Select the neural network model to download.\n\n§eQwen 2.5 3B§r: Ultra-lightweight. Fastest response, ideal for weak PCs.\n\n§eQwen 2.5 7B§r: The 'Golden Mean'. Best balance of speed and intelligence. Recommended for most users.\n\n§eQwen 2.5 14B§r: Advanced reasoning. Requires 12+ GB RAM. Slower but much smarter.\n\n§eGemma 2 9B§r: Google's model. Very creative and empathetic tone.\n\n§eMistral 7B§r: The classic reliable model. Stable and predictable.\n\n§eCustom§r: Use your own .gguf file. Specify filename in the field below.",
+
+  "residue.config.custom_model_name": "Custom Model Name",
+  "residue.config.custom_model_name.desc": "Specify model filename (e.g., my_model.gguf).\nFile must be in: /residue_ai/",
+
+  "residue.config.hf_token": "Hugging Face Token (Optional)",
+  "residue.config.hf_token.desc": "If downloads fail (error 429), get a free token here:\n§9https://huggingface.co/settings/tokens§r\n\nPaste it above to remove limits.",
+
+  "residue.config.llm_download": "Download AI Components",
+  "residue.config.llm_download.desc": "Downloads llama.cpp server and neural network model (~2 GB).\n\n§eImportant:§r Select backend first!",
+  "residue.config.llm_download.button": "Download",
+
+  "residue.config.llm_cancel": "Cancel Download",
+  "residue.config.llm_cancel.desc": "Cancels the current server or model download.",
+  "residue.config.llm_cancel.button": "Cancel",
+
+  "residue.message.download_started": "§e[Residue] Starting download... Check progress.",
+  "residue.message.download_completed": "§a[Residue] Download completed!",
+  "residue.message.download_error": "§c[Residue] Download error: %s",
+  "residue.message.download_already_in_progress": "§e[Residue] Download already in progress.",
+  "residue.message.download_cancelling": "§e[Residue] Cancelling download...",
+  "residue.message.download_cancelled": "§e[Residue] Download cancelled.",
+  "residue.message.files_not_found": "§c[Residue] Files not found. Please download components in mod settings first.",
+
+  "residue.error.custom_model_required": "Custom model: please specify filename in settings",
+
+  "residue.label.download.done": "§a✔ Download completed",
+  "residue.label.download.cancelled": "§e✖ Download cancelled",
+  "residue.label.download.error": "§c✖ Error: %s"
 }

@@ -1,60 +1,86 @@
 package com.upphorattexistera.residuemod.observer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class ObserverSessionManager {
 
-    private static Observer activeObserver;
+    public static class Session {
 
-    private static long observerSince;
+        public final Observer observer;
+        public final long joinedAtTick;
+        public long disconnectAtTick;
+        public int attention;
 
-    private static int attention;
-
-    public static void assignObserver(
-            Observer observer,
-            long currentTick
-    ) {
-
-        activeObserver = observer;
-        observerSince = currentTick;
-        attention = 0;
+        public Session(Observer observer, long joinedAtTick, long disconnectAtTick) {
+            this.observer = observer;
+            this.joinedAtTick = joinedAtTick;
+            this.disconnectAtTick = disconnectAtTick;
+            this.attention = 0;
+        }
     }
 
-    public static boolean hasObserver() {
+    private static final List<Session> activeSessions = new ArrayList<>();
 
-        return activeObserver != null;
+    // ----------------------------------------------------------------
+    // Управление сессиями
+    // ----------------------------------------------------------------
+
+    public static void addSession(Observer observer, long currentTick, long disconnectAtTick) {
+        activeSessions.add(new Session(observer, currentTick, disconnectAtTick));
     }
 
-    public static Optional<Observer> getObserver() {
-
-        return Optional.ofNullable(
-                activeObserver
-        );
-    }
-
-    public static long getObserverAge(
-            long currentTick
-    ) {
-
-        return currentTick - observerSince;
-    }
-
-    public static void addAttention(
-            int amount
-    ) {
-
-        attention += amount;
-    }
-
-    public static int getAttention() {
-
-        return attention;
+    public static void removeSession(Observer observer) {
+        activeSessions.removeIf(s -> s.observer == observer);
     }
 
     public static void clear() {
+        activeSessions.clear();
+    }
 
-        activeObserver = null;
-        observerSince = 0;
-        attention = 0;
+    // ----------------------------------------------------------------
+    // Запросы состояния
+    // ----------------------------------------------------------------
+
+    public static boolean hasObserver() {
+        return !activeSessions.isEmpty();
+    }
+
+    public static boolean isActive(Observer observer) {
+        return activeSessions.stream().anyMatch(s -> s.observer == observer);
+    }
+
+    public static List<Session> getSessions() {
+        return Collections.unmodifiableList(activeSessions);
+    }
+
+    // обратная совместимость для EventDirector и ResidueDebugHud
+    public static Optional<Observer> getObserver() {
+        return activeSessions.isEmpty()
+                ? Optional.empty()
+                : Optional.of(activeSessions.get(0).observer);
+    }
+
+    public static long getObserverAge(long currentTick) {
+        if (activeSessions.isEmpty()) return 0L;
+        return currentTick - activeSessions.get(0).joinedAtTick;
+    }
+
+    // ----------------------------------------------------------------
+    // Attention
+    // ----------------------------------------------------------------
+
+    public static void addAttention(int amount) {
+        for (Session s : activeSessions) {
+            s.attention += amount;
+        }
+    }
+
+    public static int getAttention() {
+        return activeSessions.stream()
+                .mapToInt(s -> s.attention)
+                .sum();
     }
 }

@@ -1,5 +1,6 @@
 package com.upphorattexistera.residuemod.observer;
 
+import com.upphorattexistera.residuemod.Residue;
 import com.upphorattexistera.residuemod.WorldState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -18,32 +19,23 @@ public class ObserverManager {
     }
 
     public static void tick(MinecraftServer server) {
-
         if (database == null) return;
-
-        if (ObserverSessionManager.hasObserver()) return;
-
-        assignObserver(server);
+        ObserverConnectionEvent.tick(server);
     }
 
-    public static void assignObserver(MinecraftServer server) {
-
-        Observer observer = pickByWeight();
-
-        if (observer == null) return;
-
-        observer.setUsed(true);
-
-        ObserverSessionManager.assignObserver(observer, WorldState.ticks);
-
-        server.getPlayerManager().broadcast(
-                Text.translatable(
-                        "multiplayer.player.joined",
-                        observer.getName()
-                ).formatted(Formatting.YELLOW),
-                false
-        );
-    }
+    //public static void assignObserver(MinecraftServer server) {
+    //    Observer observer = pickByWeight();
+    //    if (observer == null) return;
+    //    observer.setUsed(true);
+    //    ObserverSessionManager.assignObserver(observer, WorldState.ticks);
+    //    server.getPlayerManager().broadcast(
+    //            Text.translatable(
+    //                    "multiplayer.player.joined",
+    //                    observer.getName()
+    //            ).formatted(Formatting.YELLOW),
+    //            false
+    //    );
+    //}
 
     public static void clearObserver() {
         ObserverSessionManager.clear();
@@ -81,6 +73,15 @@ public class ObserverManager {
                 .filter(o -> !o.isUsed())
                 .toList();
 
+        // все исчерпаны — сбрасываем и начинаем заново
+        if (unused.isEmpty()) {
+            Residue.LOGGER.info("[Residue] All observers used, resetting");
+            database.observers.forEach(o -> o.setUsed(false));
+            unused = database.observers.stream()
+                    .filter(o -> !o.isUsed())
+                    .toList();
+        }
+
         if (unused.isEmpty()) return null;
 
         int totalWeight = unused.stream()
@@ -100,5 +101,9 @@ public class ObserverManager {
         }
 
         return unused.get(unused.size() - 1);
+    }
+
+    public static Observer pickUnused() {
+        return pickByWeight();
     }
 }

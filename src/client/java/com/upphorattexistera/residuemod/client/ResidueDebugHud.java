@@ -43,13 +43,7 @@ public class ResidueDebugHud implements HudElement {
         int attention = MemoryManager.getAttention();
         long ticks    = WorldState.ticks;
 
-        String observerName = ObserverSessionManager.getObserver()
-                .map(o -> o.getName())
-                .orElse("none");
-
-        long observerAge = ObserverSessionManager.hasObserver()
-                ? ObserverSessionManager.getObserverAge(ticks)
-                : 0L;
+        var sessions = ObserverSessionManager.getSessions();
 
         String stage = getStage(memory, max);
 
@@ -58,10 +52,21 @@ public class ResidueDebugHud implements HudElement {
         lines.add(new Line("Memory:     " + memory + " / " + max, COLOR_VALUE,    false));
         lines.add(new Line("Stage:       " + stage,             COLOR_STAGE,    false));
         lines.add(new Line("Attention:   " + attention,         COLOR_VALUE,    false));
-        lines.add(new Line("Observer:  " + observerName,      COLOR_OBSERVER, false));
-
-        if (ObserverSessionManager.hasObserver()) {
-            lines.add(new Line("Obs. age:    " + (observerAge / 20) + "s", COLOR_LABEL, false));
+        if (sessions.isEmpty()) {
+            lines.add(new Line("Observer:  none", COLOR_OBSERVER, false));
+        } else {
+            lines.add(new Line("Observer:  " + sessions.size(), COLOR_OBSERVER, false));
+            for (ObserverSessionManager.Session s : sessions) {
+                long age = (ticks - s.joinedAtTick) / 20;
+                long remaining = (s.disconnectAtTick - ticks) / 20;
+                lines.add(new Line(
+                        "  " + s.observer.getName()
+                                + " +" + age + "s"
+                                + " -" + remaining + "s",
+                        COLOR_LABEL,
+                        false
+                ));
+            }
         }
 
         int screenWidth = context.getScaledWindowWidth();
