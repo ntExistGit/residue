@@ -38,7 +38,7 @@ repositories {
     }
     maven {
         url "https://api.modrinth.com/maven"
-        name "Modrinth"
+        name "Modrinth Maven"
     }
 }
 

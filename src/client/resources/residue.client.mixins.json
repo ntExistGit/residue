@@ -1,10 +1,11 @@
 {
 	"required": true,
-	"package": "com.upphorattexistera.residuemod.client.mixin",
+	"package": "com.upphorattexistera.residue.client.mixin",
 	"compatibilityLevel": "JAVA_25",
   "client": [
       "MixinGameMenuScreen",
       "MixinInGameHud",
+      "MixinPlayerListEntry",
       "InGameHudAccessor"
   ],
 	"injectors": {

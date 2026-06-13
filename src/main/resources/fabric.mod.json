@@ -14,19 +14,19 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.upphorattexistera.residuemod.Residue"
+			"com.upphorattexistera.residue.Residue"
 		],
 		"client": [
-			"com.upphorattexistera.residuemod.client.ResidueClient"
+			"com.upphorattexistera.residue.client.ResidueClient"
 		],
 		"fabric-datagen": [
-			"com.upphorattexistera.residuemod.client.ResidueDataGenerator"
+			"com.upphorattexistera.residue.client.ResidueDataGenerator"
 		],
         "modmenu": [
-            "com.upphorattexistera.residuemod.client.ModMenuIntegration"
+            "com.upphorattexistera.residue.client.ModMenuIntegration"
         ],
         "voicechat": [
-            "com.upphorattexistera.residuemod.ResidueVoicechatPlugin"
+            "com.upphorattexistera.residue.ResidueVoicechatPlugin"
         ]
 	},
 	"mixins": [
