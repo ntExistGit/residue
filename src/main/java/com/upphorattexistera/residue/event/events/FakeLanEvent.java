@@ -68,6 +68,10 @@ public class FakeLanEvent {
                 Text.translatable("commands.publish.started", portText),
                 false
         );
+        server.getPlayerManager().broadcast(
+                Text.translatable("message.voicechat.server_port", portText),
+                false
+        );
         FakeLanPacket.sendTrigger(server);
     }
 }

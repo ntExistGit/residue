@@ -8,6 +8,8 @@ import com.upphorattexistera.residue.event.events.FakeLanEvent;
 import com.upphorattexistera.residue.memory.MemoryManager;
 import com.upphorattexistera.residue.network.FakeLanPacket;
 import com.upphorattexistera.residue.network.ObserverListPacket;
+import com.upphorattexistera.residue.network.ObserverMessagePacket;
+import com.upphorattexistera.residue.network.ObserverMessageRequestPacket;
 import com.upphorattexistera.residue.observer.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -27,7 +29,6 @@ public class Residue implements ModInitializer {
     public void onInitialize() {
 
         ObserverEntityType.register();
-
         FabricDefaultAttributeRegistry.register(
                 ObserverEntityType.OBSERVER,
                 ObserverEntity.createAttributes()
@@ -37,6 +38,8 @@ public class Residue implements ModInitializer {
 
         FakeLanPacket.register();
         ObserverListPacket.register();
+        ObserverMessagePacket.register();
+        ObserverMessageRequestPacket.register();
 
         ServerTickEvents.END_SERVER_TICK.register(
                 ResidueTickHandler::tick
@@ -54,6 +57,7 @@ public class Residue implements ModInitializer {
             ObserverConnectionEvent.reset();
             ObserverSessionManager.clear();
             ObserverSkinResolver.clearCache();
+            ObserverEntitySpawner.clearAll();
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

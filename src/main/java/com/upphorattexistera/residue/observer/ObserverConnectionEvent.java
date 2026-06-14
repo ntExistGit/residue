@@ -186,13 +186,15 @@ public class ObserverConnectionEvent {
         ObserverSessionManager.addSession(observer, WorldState.ticks, disconnectAt);
         ObserverTabListManager.sendAdd(server, observer);
 
-        // ← убрали блок resolve().thenAccept() отсюда
-
         server.getPlayerManager().broadcast(
                 Text.translatable("multiplayer.player.joined", observer.getName())
                         .formatted(Formatting.YELLOW),
                 false
         );
+
+        broadcastObserverList(server);
+
+        ObserverEntitySpawner.spawnForObserver(server, observer);
     }
 
     private static void executeDisconnect(MinecraftServer server, Observer observer) {
@@ -209,6 +211,9 @@ public class ObserverConnectionEvent {
         );
 
         broadcastObserverList(server);
+
+        ObserverEntitySpawner.despawnForObserver(
+                ObserverTabListManager.uuidFromName(observer.getName()));
     }
 
     public static void broadcastObserverList(MinecraftServer server) {
@@ -222,6 +227,11 @@ public class ObserverConnectionEvent {
             SkinData skinData = ObserverSkinResolver.getCached(session.observer.getName());
             String skinTextureId = null;
             boolean slim = false;
+
+            Residue.LOGGER.info("[Residue] broadcastObserverList: {} hasTextures={} source={}",
+                    session.observer.getName(),
+                    skinData.hasTextures(),
+                    skinData.hasTextures() ? skinData.getSource() : "none"); // ← добавить
 
             if (skinData.hasTextures()) {
                 skinTextureId = skinData.getTexturesProperty().value();
@@ -249,7 +259,11 @@ public class ObserverConnectionEvent {
     }
 
     public static void forceConnect(MinecraftServer server, Observer observer) {
-        executeConnect(server, observer, true);
+        ObserverSkinResolver.resolve(observer.getName()).thenAccept(skinData -> {
+            Residue.LOGGER.debug("[Residue] Skin pre-resolved for {}: hasTextures={}",
+                    observer.getName(), skinData.hasTextures());
+            server.execute(() -> executeConnect(server, observer, true));
+        });
     }
 
     public static void forceDisconnect(MinecraftServer server, Observer observer) {

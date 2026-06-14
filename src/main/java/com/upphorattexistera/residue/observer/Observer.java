@@ -1,5 +1,7 @@
 package com.upphorattexistera.residue.observer;
 
+import java.util.UUID;
+
 public class Observer {
 
     private String name;
@@ -14,6 +16,10 @@ public class Observer {
         this.name = name;
         this.weight = weight;
         this.used = false;
+    }
+
+    public UUID getUuid() {
+        return ObserverTabListManager.uuidFromName(this.name);
     }
 
     public String getName() {

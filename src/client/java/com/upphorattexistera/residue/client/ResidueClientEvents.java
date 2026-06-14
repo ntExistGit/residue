@@ -1,6 +1,5 @@
 package com.upphorattexistera.residue.client;
 
-import com.upphorattexistera.residue.client.observer.ObserverEntityManager;
 import com.upphorattexistera.residue.network.FakeLanPacket;
 import com.upphorattexistera.residue.network.ObserverListPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -53,6 +52,5 @@ public class ResidueClientEvents {
     public static void reset() {
         fakeLanActive = false;
         ResidueClientState.clear();
-        ObserverEntityManager.clear();
     }
 }

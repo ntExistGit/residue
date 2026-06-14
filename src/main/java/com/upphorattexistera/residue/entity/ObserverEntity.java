@@ -1,188 +1,105 @@
 package com.upphorattexistera.residue.entity;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.network.ClientPlayerLikeEntity;
-import net.minecraft.client.network.ClientPlayerLikeState;
-import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MovementType;
-import net.minecraft.entity.ai.control.LookControl;
-import net.minecraft.entity.ai.control.MoveControl;
-import net.minecraft.entity.ai.goal.LookAroundGoal;
-import net.minecraft.entity.ai.goal.LookAtEntityGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
-import net.minecraft.entity.ai.pathing.EntityNavigation;
-import net.minecraft.entity.ai.pathing.MobNavigation;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.ParrotEntity;
-import net.minecraft.entity.player.PlayerModelPart;
-import net.minecraft.entity.player.SkinTextures;
-import net.minecraft.entity.PlayerLikeEntity;
-import net.minecraft.util.Arm;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-public class ObserverEntity extends PlayerLikeEntity implements ClientPlayerLikeEntity {
+public class ObserverEntity extends PathAwareEntity {
 
-    private UUID observerUuid;
-    private String observerName;
-    private GameProfile gameProfile;
+    private static final TrackedData<String> OBSERVER_NAME =
+            DataTracker.registerData(ObserverEntity.class, TrackedDataHandlerRegistry.STRING);
 
-    // Для ClientPlayerLikeEntity
-    private final ClientPlayerLikeState clientState = new ClientPlayerLikeState();
-    private SkinTextures cachedSkin = null;
+    private static final TrackedData<String> OBSERVER_UUID =
+            DataTracker.registerData(ObserverEntity.class, TrackedDataHandlerRegistry.STRING);
 
-    // AI
-    private final MobNavigation navigation;
-
-    public ObserverEntity(EntityType<? extends PlayerLikeEntity> type, World world) {
+    public ObserverEntity(EntityType<? extends PathAwareEntity> type, World world) {
         super(type, world);
         this.setInvulnerable(true);
         this.setSilent(true);
-        this.noClip = false;
+        this.getNavigation().setCanOpenDoors(true);
+        this.getNavigation().setCanSwim(true);
+        this.setCanPickUpLoot(true);
+    }
 
-        // Навигация — обходит блоки как моб
-        this.navigation = new MobNavigation(this, world);
+    @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+        super.initDataTracker(builder);
+        builder.add(OBSERVER_NAME, "");
+        builder.add(OBSERVER_UUID, "");
     }
 
     public static DefaultAttributeContainer.Builder createAttributes() {
-        return MobEntity.createMobAttributes()
+        return PathAwareEntity.createMobAttributes()
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.25)
-                .add(EntityAttributes.MAX_HEALTH, 20.0);
+                .add(EntityAttributes.MAX_HEALTH, 20.0)
+                .add(EntityAttributes.FOLLOW_RANGE, 32.0);
     }
 
     @Override
     protected void initGoals() {
-        // Бродит случайно
-        this.goalSelector.add(1, new WanderAroundFarGoal(this, 0.8, 0.002f));
-        // Смотрит по сторонам
-        this.goalSelector.add(2, new LookAroundGoal(this));
-        // Иногда смотрит на игрока
-        this.goalSelector.add(3, new LookAtEntityGoal(this,
-                net.minecraft.entity.player.PlayerEntity.class, 8.0f, 0.02f));
+        this.goalSelector.add(1, new SwimGoal(this));
+        this.goalSelector.add(2, new LookAtEntityGoal(this, PlayerEntity.class, 32.0F));
+        this.goalSelector.add(3, new WanderAroundFarGoal(this, 1.0F, 1.0F));
+        this.goalSelector.add(4, new LookAroundGoal(this));
     }
-
-    @Override
-    protected EntityNavigation createNavigation(World world) {
-        return new MobNavigation(this, world);
-    }
-
-    // ----------------------------------------------------------------
-    // PlayerLikeEntity — обязательный абстрактный метод
-    // ----------------------------------------------------------------
-
-    @Override
-    public ProfileComponent getMannequinProfile() {
-        if (gameProfile != null) {
-            return new ProfileComponent(gameProfile);
-        }
-        return new ProfileComponent(new GameProfile(
-                observerUuid != null ? observerUuid : UUID.randomUUID(),
-                observerName != null ? observerName : "Observer"
-        ));
-    }
-
-    // ----------------------------------------------------------------
-    // ClientPlayerLikeEntity
-    // ----------------------------------------------------------------
-
-    @Override
-    public ClientPlayerLikeState getState() {
-        return clientState;
-    }
-
-    @Override
-    public SkinTextures getSkin() {
-        if (cachedSkin != null) return cachedSkin;
-        // Возвращаем дефолтный скин пока не загружен
-        return net.minecraft.client.util.DefaultSkinHelper.getSkinTextures(
-                observerUuid != null ? observerUuid : UUID.randomUUID()
-        );
-    }
-
-    @Override
-    public @Nullable ParrotEntity.Variant getShoulderParrotVariant(boolean leftShoulder) {
-        return null;
-    }
-
-    @Override
-    public boolean hasExtraEars() {
-        return false;
-    }
-
-    // ----------------------------------------------------------------
-    // Все части модели видимы
-    // ----------------------------------------------------------------
-
-    @Override
-    public boolean isModelPartVisible(PlayerModelPart part) {
-        return true;
-    }
-
-    // ----------------------------------------------------------------
-    // Не колидится с игроком, не показывает имя
-    // ----------------------------------------------------------------
-
-    @Override
-    public boolean isCollidable() {
-        return false;
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeSetOnFire() {
-        return false;
-    }
-
-    // ----------------------------------------------------------------
-    // Тик — обновляем ClientPlayerLikeState для анимации
-    // ----------------------------------------------------------------
 
     @Override
     public void tick() {
         super.tick();
-        clientState.tick(this.getEntityPos(), this.getVelocity());
+        if (!this.getEntityWorld().isClient()) {
+            boolean isNight = this.getEntityWorld().isNight();
+            ItemStack offhandItem = this.getStackInHand(Hand.OFF_HAND);
+
+            if (isNight && offhandItem.isEmpty()) {
+                Item lightItem = this.random.nextBoolean() ? Items.TORCH : Items.LANTERN;
+                this.setStackInHand(Hand.OFF_HAND, new ItemStack(lightItem));
+            } else if (!isNight && (offhandItem.getItem() == Items.TORCH
+                    || offhandItem.getItem() == Items.LANTERN)) {
+                this.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
+            }
+        }
     }
 
     @Override
-    protected void addDistanceMoved(float distanceMoved) {
-        clientState.addDistanceMoved(distanceMoved);
-    }
-
-    // ----------------------------------------------------------------
-    // Сеттеры
-    // ----------------------------------------------------------------
-
-    public void setObserverUuid(UUID uuid) {
-        this.observerUuid = uuid;
-    }
-
-    public UUID getObserverUuid() {
-        return observerUuid;
+    public Vec3d getVehicleAttachmentPos(Entity vehicle) {
+        Vec3d standard = super.getVehicleAttachmentPos(vehicle);
+        return new Vec3d(standard.x, standard.y + 0.5, standard.z); // подбери значение
     }
 
     public void setObserverName(String name) {
-        this.observerName = name;
+        this.getDataTracker().set(OBSERVER_NAME, name);
     }
 
     public String getObserverName() {
-        return observerName;
+        return this.getDataTracker().get(OBSERVER_NAME);
     }
 
-    public void setGameProfile(GameProfile profile) {
-        this.gameProfile = profile;
+    public void setObserverUuid(UUID uuid) {
+        this.getDataTracker().set(OBSERVER_UUID, uuid != null ? uuid.toString() : "");
     }
 
-    public void setCachedSkin(SkinTextures skin) {
-        this.cachedSkin = skin;
+    public UUID getObserverUuid() {
+        String uuidStr = this.getDataTracker().get(OBSERVER_UUID);
+        if (uuidStr == null || uuidStr.isEmpty()) return null;
+        try {
+            return UUID.fromString(uuidStr);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

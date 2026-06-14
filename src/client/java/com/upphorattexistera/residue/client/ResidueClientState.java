@@ -2,7 +2,6 @@ package com.upphorattexistera.residue.client;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.upphorattexistera.residue.client.observer.ObserverEntityManager;
 import com.upphorattexistera.residue.network.ObserverListPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
@@ -45,8 +44,6 @@ public class ResidueClientState {
                 registerSkin(entry.uuid(), entry.name(), entry.skinTextureId());
             }
         }
-
-        ObserverEntityManager.sync(newList);
     }
 
     public static boolean isObserverSlim(UUID uuid) {
@@ -95,22 +92,15 @@ public class ResidueClientState {
                 // Регистрируем текстуру в главном потоке
                 MinecraftClient.getInstance().execute(() -> {
                     try {
-                        NativeImage image = NativeImage.read(
-                                new ByteArrayInputStream(finalBytes));
+                        NativeImage image = NativeImage.read(new ByteArrayInputStream(finalBytes));
                         NativeImageBackedTexture texture =
-                                new NativeImageBackedTexture(
-                                        () -> "residue_observer_" + name, image);
-                        Identifier id = Identifier.of(
-                                "residue", "observer_skin/" + name.toLowerCase());
-                        MinecraftClient.getInstance()
-                                .getTextureManager()
-                                .registerTexture(id, texture);
+                                new NativeImageBackedTexture(() -> "residue_observer_" + name, image);
+                        Identifier id = Identifier.of("residue", "observer_skin/" + name.toLowerCase());
+                        MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
                         skinTextures.put(uuid, id);
-                        System.out.println("[Residue] Skin registered for " + name
-                                + " → " + id);
+                        System.out.println("[Residue] Skin registered for " + name + " → " + id); // ← есть ли этот лог?
                     } catch (Exception e) {
-                        System.err.println("[Residue] Failed to register skin for "
-                                + name + ": " + e.getMessage());
+                        System.err.println("[Residue] Failed to register skin for " + name + ": " + e.getMessage());
                     }
                 });
 
