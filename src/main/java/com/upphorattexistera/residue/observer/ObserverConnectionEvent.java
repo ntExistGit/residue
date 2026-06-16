@@ -5,6 +5,7 @@ import com.upphorattexistera.residue.WorldState;
 import com.upphorattexistera.residue.config.ResidueConfig;
 import com.upphorattexistera.residue.event.events.FakeLanEvent;
 import com.upphorattexistera.residue.network.ObserverListPacket;
+import com.upphorattexistera.residue.observer.persona.ObserverDataStore;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -184,6 +185,7 @@ public class ObserverConnectionEvent {
         }
 
         ObserverSessionManager.addSession(observer, WorldState.ticks, disconnectAt);
+        ObserverDataStore.getOrCreate(observer.getName(), "");
         ObserverTabListManager.sendAdd(server, observer);
 
         server.getPlayerManager().broadcast(

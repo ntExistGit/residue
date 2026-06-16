@@ -21,7 +21,7 @@ public class ObserverEntitySpawner {
     private static final double MIN_DIST = 30;
     private static final double MAX_DIST = 70;
 
-    private static final EntityType<? extends BoatEntity>[] BOAT_TYPES = new EntityType[]{
+    private static final EntityType[] BOAT_TYPES = new EntityType[]{
             EntityType.OAK_BOAT,
             EntityType.SPRUCE_BOAT,
             EntityType.BIRCH_BOAT,
@@ -57,8 +57,8 @@ public class ObserverEntitySpawner {
                 || !world.getFluidState(spawnPos.down()).isEmpty();
 
         if (isWater) {
-            EntityType<? extends BoatEntity> boatType = BOAT_TYPES[RANDOM.nextInt(BOAT_TYPES.length)];
-            BoatEntity boat = boatType.create(world, SpawnReason.NATURAL);
+            EntityType boatType = BOAT_TYPES[RANDOM.nextInt(BOAT_TYPES.length)];
+            BoatEntity boat = (BoatEntity) boatType.create(world, SpawnReason.NATURAL);
             if (boat == null) return;
 
             boat.refreshPositionAndAngles(spawnPos.getX() + 0.5, spawnPos.getY() + 1.0, spawnPos.getZ() + 0.5, 0, 0);

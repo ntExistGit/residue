@@ -83,15 +83,22 @@ public class ResidueClientCommands {
                 (payload, context) -> {
                     String observerName = payload.observerName();
                     String playerMessage = payload.playerMessage();
+                    String systemPrompt  = payload.systemPrompt();
+                    double temperature   = payload.temperature();
+                    int maxTokens        = payload.maxTokens();
+                    String historyJson   = payload.historyJson();
 
                     Thread.ofVirtual().name("residue-observer-reply").start(() -> {
-                        String reply = ChatAI.askAsObserver(observerName, playerMessage);
+                        String reply = ChatAI.askAsObserver(
+                                observerName, playerMessage,
+                                systemPrompt, temperature, maxTokens, historyJson);
 
                         context.client().execute(() -> {
                             if (context.client().player == null) return;
 
                             if (reply != null) {
-                                var registryManager = Objects.requireNonNull(context.client().world).getRegistryManager();
+                                var registryManager = Objects.requireNonNull(
+                                        context.client().world).getRegistryManager();
 
                                 MessageType.Parameters params = MessageType.params(
                                         MessageType.MSG_COMMAND_INCOMING,
@@ -99,8 +106,10 @@ public class ResidueClientCommands {
                                         Text.literal(observerName)
                                 );
 
-                                Text formattedReply = params.applyChatDecoration(Text.literal(reply));
-                                Objects.requireNonNull(context.client().player).sendMessage(formattedReply);
+                                Text formattedReply = params.applyChatDecoration(
+                                        Text.literal(reply));
+                                Objects.requireNonNull(context.client().player)
+                                        .sendMessage(formattedReply);
                             }
                         });
                     });

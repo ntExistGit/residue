@@ -13,7 +13,7 @@ public class ResidueClientConnectionEvents {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             serverStartAttempted = false;
 
-            if (ResidueConfig.INSTANCE.llmEnable && !serverStartAttempted) {
+            if (ResidueConfig.INSTANCE.llmEnable) {
                 serverStartAttempted = true;
 
                 new Thread(() -> {

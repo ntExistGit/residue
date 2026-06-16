@@ -6,6 +6,8 @@ import com.mojang.authlib.properties.Property;
 import com.upphorattexistera.residue.Residue;
 import com.upphorattexistera.residue.config.ResidueConfig;
 import com.upphorattexistera.residue.memory.MemoryManager;
+import com.upphorattexistera.residue.observer.persona.ObserverAssignment;
+import com.upphorattexistera.residue.observer.persona.ObserverDataStore;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 
@@ -31,11 +33,6 @@ public class ObserverSkinResolver {
 
     // Кеш: имя → SkinData (чтобы не делать повторные запросы)
     private static final ConcurrentHashMap<String, SkinData> cache =
-            new ConcurrentHashMap<>();
-
-    // Привязка: имя обсервера → имя файла скина (например "slim_03.png")
-    // Сохраняется на всё время работы сервера
-    private static final ConcurrentHashMap<String, String> assignedSkinFiles =
             new ConcurrentHashMap<>();
 
     // ----------------------------------------------------------------
@@ -79,15 +76,6 @@ public class ObserverSkinResolver {
      */
     public static void clearCache() {
         cache.clear();
-    }
-
-    /**
-     * Полный сброс — вызывать только если нужно
-     * переназначить скины всем обсерверам заново.
-     */
-    public static void clearAll() {
-        cache.clear();
-        assignedSkinFiles.clear();
     }
 
     // ----------------------------------------------------------------
@@ -159,23 +147,34 @@ public class ObserverSkinResolver {
             Path dir = dirOpt.get();
             if (!Files.isDirectory(dir)) return SkinData.unknown();
 
-            // Собираем все PNG файлы в папке стейджа
             List<Path> skins = new ArrayList<>();
             try (var stream = Files.list(dir)) {
                 stream.filter(p -> p.getFileName().toString().endsWith(".png"))
-                        .sorted() // стабильный порядок
+                        .sorted()
                         .forEach(skins::add);
             }
-
             if (skins.isEmpty()) return SkinData.unknown();
 
-            // Определяем файл скина для этого обсервера
-            Path skinPath = resolveSkinPath(name, stage, skins, dir, mod.get());
+            Path skinPath = null;
+            ObserverAssignment assignment = ObserverDataStore.get(name);
 
-            if (skinPath == null) return SkinData.unknown();
+            // Если привязка есть и стадия совпадает — ищем тот же файл
+            if (assignment != null && assignment.skinFile != null
+                    && assignment.skinStage == stage) {
+                skinPath = skins.stream()
+                        .filter(p -> p.getFileName().toString().equals(assignment.skinFile))
+                        .findFirst()
+                        .orElse(null);
+            }
 
-            Residue.LOGGER.debug("[Residue] Local skin for {}: stage_{}/{}",
-                    name, stage, skinPath.getFileName());
+            // Не нашли — выбираем случайный и сохраняем
+            if (skinPath == null) {
+                skinPath = skins.get(RANDOM.nextInt(skins.size()));
+                String chosen = skinPath.getFileName().toString();
+                ObserverDataStore.updateSkin(name, chosen, stage);
+                Residue.LOGGER.debug("[Residue] {} → new skin: stage_{}/{}",
+                        name, stage, chosen);
+            }
 
             return buildSkinData(name, skinPath);
 
@@ -184,54 +183,6 @@ public class ObserverSkinResolver {
                     name, e.getMessage());
             return SkinData.unknown();
         }
-    }
-
-    /**
-     * Определяет путь к файлу скина для обсервера.
-     *
-     * Логика:
-     * 1. Если обсервер уже получал скин — ищем тот же файл в текущем стейдже.
-     * 2. Если файл найден — используем его (скин сохраняется между стейджами).
-     * 3. Если файл не найден (стейдж сменился и такого файла нет) — выбираем
-     *    случайный из текущего стейджа и запоминаем.
-     * 4. Если обсервер новый — выбираем случайный и запоминаем.
-     */
-    private static Path resolveSkinPath(String name, int stage,
-                                        List<Path> skins, Path dir,
-                                        ModContainer mod) {
-
-        String assignedFile = assignedSkinFiles.get(name);
-
-        if (assignedFile != null) {
-            // Ищем тот же файл в текущем стейдже
-            Path existing = skins.stream()
-                    .filter(p -> p.getFileName().toString().equals(assignedFile))
-                    .findFirst()
-                    .orElse(null);
-
-            if (existing != null) {
-                Residue.LOGGER.debug(
-                        "[Residue] {} → reusing assigned skin: {}",
-                        name, assignedFile);
-                return existing;
-            }
-
-            // Файл не найден в текущем стейдже — выбираем новый случайный
-            Residue.LOGGER.debug(
-                    "[Residue] {} → assigned skin '{}' not found in stage_{}, picking new",
-                    name, assignedFile, stage);
-        }
-
-        // Первое подключение или файл не найден — случайный выбор
-        Path chosen = skins.get(RANDOM.nextInt(skins.size()));
-        String chosenFileName = chosen.getFileName().toString();
-        assignedSkinFiles.put(name, chosenFileName);
-
-        Residue.LOGGER.debug(
-                "[Residue] {} → assigned new skin: stage_{}/{}",
-                name, stage, chosenFileName);
-
-        return chosen;
     }
 
     /**

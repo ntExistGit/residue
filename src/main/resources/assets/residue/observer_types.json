@@ -1,0 +1,70 @@
+{
+  "types": [
+    {
+      "id": "watcher",
+      "cooldown_min_seconds": 120,
+      "cooldown_max_seconds": 420,
+      "chance_per_stage": {
+        "0": 2.0,
+        "1": 8.0,
+        "2": 18.0,
+        "3": 35.0,
+        "4": 55.0
+      },
+      "contexts": {
+        "default": "[You are watching the player. They are at coordinates {x}, {y}, {z}. It is {time}. They are {surface}. Say something brief that implies you know exactly where they are. Do not reveal the coordinates directly.]",
+        "night": "[It is night. The player is at {x}, {y}, {z}. Say something that implies you watch them in the dark.]",
+        "underground": "[The player is underground at depth {y}. Say something implying you know they are hiding below.]"
+      }
+    },
+    {
+      "id": "inventory",
+      "cooldown_min_seconds": 180,
+      "cooldown_max_seconds": 600,
+      "chance_per_stage": {
+        "0": 1.4,
+        "1": 5.6,
+        "2": 12.6,
+        "3": 24.5,
+        "4": 38.5
+      },
+      "contexts": {
+        "default": "[You can see what the player is carrying: {items}. Say something brief that implies you can see their inventory. Pick one detail.]",
+        "empty": "[The player's inventory is empty. Comment on that briefly and unsettlingly.]",
+        "low_health": "[The player has {health} HP out of {max_health}. Comment on their condition.]"
+      }
+    },
+    {
+      "id": "horror",
+      "cooldown_min_seconds": 60,
+      "cooldown_max_seconds": 300,
+      "chance_per_stage": {
+        "0": 2.6,
+        "1": 10.4,
+        "2": 23.4,
+        "3": 45.5,
+        "4": 71.5
+      },
+      "contexts": {
+        "default": "[Say something cryptic and unsettling without any specific context.]",
+        "night": "[It is night in Minecraft. Say something brief and deeply unsettling.]",
+        "low_health": "[The player is badly injured. Say something unsettling about that.]"
+      }
+    },
+    {
+      "id": "silent",
+      "cooldown_min_seconds": 300,
+      "cooldown_max_seconds": 900,
+      "chance_per_stage": {
+        "0": 0.6,
+        "1": 2.4,
+        "2": 5.4,
+        "3": 10.5,
+        "4": 16.5
+      },
+      "contexts": {
+        "default": "[Say something extremely brief and unsettling. One sentence maximum.]"
+      }
+    }
+  ]
+}

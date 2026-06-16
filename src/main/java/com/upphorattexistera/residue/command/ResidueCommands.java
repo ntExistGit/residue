@@ -2,7 +2,6 @@ package com.upphorattexistera.residue.command;
 
 import com.upphorattexistera.residue.command.sub.FakeLanCommand;
 import com.upphorattexistera.residue.command.sub.MemoryCommand;
-import com.upphorattexistera.residue.command.sub.MessageCommand;
 import com.upphorattexistera.residue.command.sub.ObserverCommand;
 
 import com.mojang.brigadier.CommandDispatcher;

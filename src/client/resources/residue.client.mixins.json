@@ -1,17 +1,21 @@
 {
-	"required": true,
-	"package": "com.upphorattexistera.residue.client.mixin",
-	"compatibilityLevel": "JAVA_25",
+  "required": true,
+  "package": "com.upphorattexistera.residue.client.mixin",
+  "compatibilityLevel": "JAVA_25",
   "client": [
-      "MixinGameMenuScreen",
-      "MixinInGameHud",
-      "MixinPlayerListEntry",
-      "InGameHudAccessor"
+    "InGameHudAccessor",
+    "MixinGameMenuScreen",
+    "MixinInGameHud",
+    "MixinPlayerListEntry"
   ],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "mixins": [
+    "MixinClientPlayNetworkHandler",
+    "MixinMinecraftClient"
+  ]
 }
