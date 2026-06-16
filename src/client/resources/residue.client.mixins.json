@@ -4,8 +4,10 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "InGameHudAccessor",
+    "MixinClientPlayNetworkHandler",
     "MixinGameMenuScreen",
     "MixinInGameHud",
+    "MixinMinecraftClient",
     "MixinPlayerListEntry"
   ],
   "injectors": {
@@ -15,7 +17,6 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "MixinClientPlayNetworkHandler",
-    "MixinMinecraftClient"
+
   ]
 }
