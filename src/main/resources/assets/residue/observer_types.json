@@ -2,68 +2,77 @@
   "types": [
     {
       "id": "watcher",
-      "cooldown_min_seconds": 120,
-      "cooldown_max_seconds": 420,
+      "cooldown_min_seconds": 180,
+      "cooldown_max_seconds": 540,
       "chance_per_stage": {
-        "0": 2.0,
-        "1": 8.0,
-        "2": 18.0,
-        "3": 35.0,
-        "4": 55.0
+        "0": 1.5,
+        "1": 6.0,
+        "2": 14.0,
+        "3": 28.0,
+        "4": 45.0
       },
       "contexts": {
-        "default": "[You are watching the player. They are at coordinates {x}, {y}, {z}. It is {time}. They are {surface}. Say something brief that implies you know exactly where they are. Do not reveal the coordinates directly.]",
-        "night": "[It is night. The player is at {x}, {y}, {z}. Say something that implies you watch them in the dark.]",
-        "underground": "[The player is underground at depth {y}. Say something implying you know they are hiding below.]"
+        "default": "[You are watching {player} from somewhere they cannot see. They are at {x}, {y}, {z}. It is {time}. They are {surface}. Say one thing that implies you have been watching without being specific about coordinates.]",
+        "night": "[It is {time}. {player} is at {x}, {y}, {z}. The light level is {light}. It is dark. Say something brief that implies you are watching them in the dark right now.]",
+        "underground": "[{player} has gone underground. They are at depth {y} in {biome}. Say something that implies you followed them down here. Do not be direct about it.]",
+        "player_idle": "[{player} has been standing still for {idle_seconds} seconds at {x}, {y}, {z}. They are not moving. Comment on this in a way that makes it clear you noticed immediately.]",
+        "rain": "[It is raining. {player} is at {x}, {y}, {z}. The weather is {weather}. Say something brief about the rain that implies you are outside with them.]"
       }
     },
     {
       "id": "inventory",
-      "cooldown_min_seconds": 180,
-      "cooldown_max_seconds": 600,
+      "cooldown_min_seconds": 240,
+      "cooldown_max_seconds": 720,
       "chance_per_stage": {
-        "0": 1.4,
-        "1": 5.6,
-        "2": 12.6,
-        "3": 24.5,
-        "4": 38.5
+        "0": 1.0,
+        "1": 4.0,
+        "2": 10.0,
+        "3": 20.0,
+        "4": 32.0
       },
       "contexts": {
-        "default": "[You can see what the player is carrying: {items}. Say something brief that implies you can see their inventory. Pick one detail.]",
-        "empty": "[The player's inventory is empty. Comment on that briefly and unsettlingly.]",
-        "low_health": "[The player has {health} HP out of {max_health}. Comment on their condition.]"
+        "default": "[You can see {player}'s inventory. They are carrying: {items}. They are holding {hand_item}. Say one brief thing that implies you can see what they are holding. Pick one specific item. Do not list everything.]",
+        "empty": "[{player}'s inventory is nearly empty. Comment on this in a way that implies you have been watching what they have collected and spent. Make it unsettling.]",
+        "low_health": "[{player} has {health} out of {max_health} HP. They are {health_state}. Say one thing about their condition. Do not offer help. Do not express concern. Just observe.]",
+        "has_valuables": "[{player} is carrying valuable items including {items}. Say something that implies you know the value of what they are carrying and have been keeping track.]",
+        "no_torch": "[{player} has no torch. It is {time} and the light level is {light}. Comment on this in one sentence. Do not warn them. Just notice.]"
       }
     },
     {
       "id": "horror",
-      "cooldown_min_seconds": 60,
-      "cooldown_max_seconds": 300,
+      "cooldown_min_seconds": 120,
+      "cooldown_max_seconds": 400,
       "chance_per_stage": {
-        "0": 2.6,
-        "1": 10.4,
-        "2": 23.4,
-        "3": 45.5,
-        "4": 71.5
+        "0": 2.0,
+        "1": 8.0,
+        "2": 18.0,
+        "3": 38.0,
+        "4": 60.0
       },
       "contexts": {
-        "default": "[Say something cryptic and unsettling without any specific context.]",
-        "night": "[It is night in Minecraft. Say something brief and deeply unsettling.]",
-        "low_health": "[The player is badly injured. Say something unsettling about that.]"
+        "default": "[Say something cryptic and deeply unsettling to {player}. No context. No explanation. One or two sentences maximum. Do not reference specific game mechanics. Speak like someone who knows something the player does not.]",
+        "night": "[It is {time}. {player} is playing at night. The moon is {moon}. Say something brief and unsettling about the night. Do not be poetic. Be direct and wrong-feeling.]",
+        "low_health": "[{player} is badly hurt. {health} HP remaining. Say something that implies you knew this was going to happen. Do not offer help. Do not show sympathy.]",
+        "full_moon": "[Tonight is a full moon. {player} is at {x}, {y}, {z}. Say one sentence. It should feel like a warning about something specific that you refuse to name.]",
+        "thunder": "[There is a thunderstorm. {player} is at {x}, {y}, {z}. The weather is {weather}. Say something that implies the storm is connected to your presence here.]",
+        "underground": "[{player} is underground at {y} in {biome}. It is dark and enclosed. Say something that implies you are also underground. Not far away. Close.]"
       }
     },
     {
       "id": "silent",
-      "cooldown_min_seconds": 300,
-      "cooldown_max_seconds": 900,
+      "cooldown_min_seconds": 480,
+      "cooldown_max_seconds": 1200,
       "chance_per_stage": {
-        "0": 0.6,
-        "1": 2.4,
-        "2": 5.4,
-        "3": 10.5,
-        "4": 16.5
+        "0": 0.4,
+        "1": 1.8,
+        "2": 4.5,
+        "3": 9.0,
+        "4": 14.0
       },
       "contexts": {
-        "default": "[Say something extremely brief and unsettling. One sentence maximum.]"
+        "default": "[Say one sentence to {player}. Maximum eight words. It must be unsettling. It must feel like something no one should know. Do not explain it.]",
+        "night": "[One sentence. Night time. {player} is alone. Eight words maximum. Make it feel like a statement of fact about something impossible.]",
+        "long_silence": "[{player} has been idle for {idle_seconds} seconds. They are at {x}, {y}, {z}. Acknowledge their stillness in one sentence. Under eight words. Make them regret standing still.]"
       }
     }
   ]
