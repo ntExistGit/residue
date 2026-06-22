@@ -10,19 +10,16 @@ public class SkinData {
         SLIM     // Alex — тонкие руки
     }
 
+    public enum Source {
+        LOCAL,
+        UNKNOWN
+    }
+
     @Nullable
     private final Property texturesProperty;
 
     private final Model model;
-
     private final Source source;
-
-    public enum Source {
-        MOJANG,
-        ELY_BY,
-        LOCAL,
-        UNKNOWN
-    }
 
     public SkinData(@Nullable Property texturesProperty, Model model, Source source) {
         this.texturesProperty = texturesProperty;

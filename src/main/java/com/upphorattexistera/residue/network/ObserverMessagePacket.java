@@ -14,13 +14,18 @@ public class ObserverMessagePacket {
     public static final CustomPayload.Id<Payload> ID =
             new CustomPayload.Id<>(Identifier.of("residue", "observer_message"));
 
+    /**
+     * @param isPublic true  — запрос пришёл из общего чата, ответ нужно показать публично
+     *                 false — запрос пришёл из /msg, ответ показываем как личное сообщение
+     */
     public record Payload(
             String observerName,
             String playerMessage,
             String systemPrompt,
             double temperature,
             int maxTokens,
-            String historyJson
+            String historyJson,
+            boolean isPublic
     ) implements CustomPayload {
 
         public static final PacketCodec<RegistryByteBuf, Payload> CODEC =
@@ -32,6 +37,7 @@ public class ObserverMessagePacket {
                             buf.writeDouble(value.temperature());
                             buf.writeInt(value.maxTokens());
                             buf.writeString(value.historyJson());
+                            buf.writeBoolean(value.isPublic());
                         },
                         buf -> new Payload(
                                 buf.readString(),
@@ -39,12 +45,15 @@ public class ObserverMessagePacket {
                                 buf.readString(),
                                 buf.readDouble(),
                                 buf.readInt(),
-                                buf.readString()
+                                buf.readString(),
+                                buf.readBoolean()
                         )
                 );
 
         @Override
-        public Id<? extends CustomPayload> getId() { return ID; }
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
     }
 
     public static void register() {

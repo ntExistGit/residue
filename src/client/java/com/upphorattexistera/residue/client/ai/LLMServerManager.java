@@ -39,14 +39,14 @@ public class LLMServerManager {
     private final Path baseDir   = Paths.get("residue_ai");
     private final Path serverDir = baseDir.resolve("server");
 
-    /** Status label in UI (may be null if settings screen hasn't been opened) */
+    /** Status label in UI (maybe null if settings screen hasn't been opened) */
     private volatile DownloadStatusLabel statusLabel;
 
     private final AtomicBoolean downloadCancelled = new AtomicBoolean(false);
     private volatile Thread downloadThread;
 
     private static final String[] MIRRORS = {
-            "",                          // original huggingface
+            "",
             "https://hf-mirror.com",
             "https://alpha.hf-mirror.com"
     };

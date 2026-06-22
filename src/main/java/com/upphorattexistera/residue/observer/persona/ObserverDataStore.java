@@ -2,6 +2,7 @@ package com.upphorattexistera.residue.observer.persona;
 
 import com.google.gson.*;
 import com.upphorattexistera.residue.Residue;
+import com.upphorattexistera.residue.config.ResidueConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
 
@@ -18,7 +19,7 @@ public class ObserverDataStore {
             new ConcurrentHashMap<>();
 
     private static Path savePath;
-    private static final int MAX_HISTORY_SIZE = 40; // можно вынести в конфиг
+    private static final int MAX_HISTORY_SIZE = ResidueConfig.INSTANCE.maxHistorySize;
 
     // ----------------------------------------------------------------
     // Init

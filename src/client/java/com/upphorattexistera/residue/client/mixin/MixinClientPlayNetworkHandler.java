@@ -17,32 +17,38 @@ import java.util.List;
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
 
+    /**
+     * Перехватываем отправку сообщения в общий чат.
+     * Если в сообщении упомянут активный обсервер — посылаем запрос на ответ.
+     * Флаг isPublic = true, чтобы ответ отобразился в общем чате.
+     */
     @Inject(at = @At("HEAD"), method = "sendChatMessage")
     private void onSendChatMessage(String content, CallbackInfo ci) {
-
         List<String> mentioned = findMentionedObservers(content);
         if (mentioned.isEmpty()) return;
 
         String playerName = getPlayerName();
+        // Передаём в промпт и имя игрока, и само сообщение — для контекста
         String contextMessage = playerName != null
                 ? playerName + ": " + content
                 : content;
 
+        // Если упомянуто несколько — отвечают все, с небольшим сдвигом по времени
         Collections.shuffle(mentioned);
         for (int i = 0; i < mentioned.size(); i++) {
             String observerName = mentioned.get(i);
-            long delayMs = i * 1000L;
+            long delayMs = i * 1200L; // чуть больше секунды между ответами
 
             Thread.ofVirtual().name("residue-chat-trigger-" + observerName).start(() -> {
                 if (delayMs > 0) {
-                    try {
-                        Thread.sleep(delayMs);
-                    } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(delayMs); } catch (InterruptedException ignored) {}
                 }
-
                 ClientPlayNetworking.send(
                         new ObserverMessageRequestPacket.Payload(
-                                observerName, contextMessage));
+                                observerName,
+                                contextMessage,
+                                true  // isPublic — ответ идёт в общий чат
+                        ));
             });
         }
     }
@@ -50,13 +56,11 @@ public class MixinClientPlayNetworkHandler {
     private List<String> findMentionedObservers(String message) {
         List<String> result = new ArrayList<>();
         String lower = message.toLowerCase();
-
         for (var entry : ResidueClientState.getObservers()) {
             if (lower.contains(entry.name().toLowerCase())) {
                 result.add(entry.name());
             }
         }
-
         return result;
     }
 

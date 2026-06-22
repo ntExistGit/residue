@@ -1,10 +1,7 @@
 package com.upphorattexistera.residue.config.category;
 
 import com.upphorattexistera.residue.client.ai.LLMServerManager;
-import com.upphorattexistera.residue.config.DownloadStatusLabel;
-import com.upphorattexistera.residue.config.LLMBackend;
-import com.upphorattexistera.residue.config.LLMModel;
-import com.upphorattexistera.residue.config.ResidueConfig;
+import com.upphorattexistera.residue.config.*;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import net.minecraft.client.MinecraftClient;
@@ -69,6 +66,32 @@ public final class LlamaCategory {
                                 () -> ResidueConfig.INSTANCE.customModelName,
                                 value -> ResidueConfig.INSTANCE.customModelName = value)
                         .controller(StringControllerBuilder::create)
+                        .build())
+
+                .option(Option.<LLMLanguage>createBuilder()
+                        .name(Text.translatable(""))
+                        .description(OptionDescription.of(
+                                Text.translatable("")))
+                        .binding(LLMLanguage.ENGLISH,
+                                () -> ResidueConfig.INSTANCE.llmLang,
+                                value -> {
+                                    ResidueConfig.INSTANCE.llmLang = value;
+                                    statusLabel.reset();
+                                })
+                        .controller(opt -> EnumControllerBuilder.create(opt)
+                                .enumClass(LLMLanguage.class)
+                                .formatValue(val -> Text.literal(val.displayName)))
+                        .build())
+
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable(""))
+                        .description(OptionDescription.of(
+                                Text.translatable("")))
+                        .binding(true,
+                                () -> ResidueConfig.INSTANCE.llmThink,
+                                value -> ResidueConfig.INSTANCE.llmThink = value)
+                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                .trueFalseFormatter().coloured(true))
                         .build())
 
                 .option(Option.<String>createBuilder()
@@ -141,6 +164,17 @@ public final class LlamaCategory {
                                 client.player.sendMessage(
                                         Text.translatable("residue.message.download_cancelling"));
                         })
+                        .build())
+
+                .option(Option.<Integer>createBuilder()
+                        .name(Text.translatable(""))
+                        .description(OptionDescription.of(
+                                Text.translatable("")))
+                        .binding(40,
+                                () -> ResidueConfig.INSTANCE.maxHistorySize,
+                                value -> ResidueConfig.INSTANCE.maxHistorySize = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                .range(10, 100).step(1))
                         .build())
 
                 .build();

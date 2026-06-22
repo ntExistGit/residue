@@ -73,7 +73,6 @@ public class ChatAI {
                         .getAsJsonObject("message")
                         .get("content").getAsString().trim();
 
-                // Отправляем историю на сервер для сохранения
                 ClientPlayNetworking.send(
                         new ObserverHistoryUpdatePacket.Payload(
                                 observerName, playerMessage, content));

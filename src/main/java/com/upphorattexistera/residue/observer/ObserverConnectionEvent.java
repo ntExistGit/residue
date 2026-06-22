@@ -108,9 +108,6 @@ public class ObserverConnectionEvent {
 
         // Сначала резолвим скин, потом подключаем
         ObserverSkinResolver.resolve(observer.getName()).thenAccept(skinData -> {
-            Residue.LOGGER.debug("[Residue] Skin pre-resolved for {}: hasTextures={}",
-                    observer.getName(), skinData.hasTextures());
-
             // Возвращаемся в серверный поток для планирования событий
             server.execute(() -> {
                 boolean flap = RANDOM.nextDouble() < cfg.observerFlapChance / 100.0;
@@ -230,11 +227,6 @@ public class ObserverConnectionEvent {
             String skinTextureId = null;
             boolean slim = false;
 
-            Residue.LOGGER.info("[Residue] broadcastObserverList: {} hasTextures={} source={}",
-                    session.observer.getName(),
-                    skinData.hasTextures(),
-                    skinData.hasTextures() ? skinData.getSource() : "none"); // ← добавить
-
             if (skinData.hasTextures()) {
                 skinTextureId = skinData.getTexturesProperty().value();
                 slim = skinData.isSlim();
@@ -262,8 +254,6 @@ public class ObserverConnectionEvent {
 
     public static void forceConnect(MinecraftServer server, Observer observer) {
         ObserverSkinResolver.resolve(observer.getName()).thenAccept(skinData -> {
-            Residue.LOGGER.debug("[Residue] Skin pre-resolved for {}: hasTextures={}",
-                    observer.getName(), skinData.hasTextures());
             server.execute(() -> executeConnect(server, observer, true));
         });
     }

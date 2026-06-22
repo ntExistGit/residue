@@ -20,20 +20,6 @@ public class ObserverManager {
         ObserverConnectionEvent.tick(server);
     }
 
-    //public static void assignObserver(MinecraftServer server) {
-    //    Observer observer = pickByWeight();
-    //    if (observer == null) return;
-    //    observer.setUsed(true);
-    //    ObserverSessionManager.assignObserver(observer, WorldState.ticks);
-    //    server.getPlayerManager().broadcast(
-    //            Text.translatable(
-    //                    "multiplayer.player.joined",
-    //                    observer.getName()
-    //            ).formatted(Formatting.YELLOW),
-    //            false
-    //    );
-    //}
-
     public static void clearObserver() {
         ObserverSessionManager.clear();
     }
@@ -58,10 +44,6 @@ public class ObserverManager {
         }
     }
 
-    /**
-     * Взвешенный случайный выбор из неиспользованных наблюдателей.
-     * Наблюдатели с большим weight выпадают чаще.
-     */
     private static Observer pickByWeight() {
 
         if (database == null) return null;
@@ -70,7 +52,6 @@ public class ObserverManager {
                 .filter(o -> !o.isUsed())
                 .toList();
 
-        // все исчерпаны — сбрасываем и начинаем заново
         if (unused.isEmpty()) {
             Residue.LOGGER.info("[Residue] All observers used, resetting");
             database.observers.forEach(o -> o.setUsed(false));

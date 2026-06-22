@@ -2,6 +2,7 @@ package com.upphorattexistera.residue.client;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.upphorattexistera.residue.Residue;
 import com.upphorattexistera.residue.network.ObserverListPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
@@ -9,10 +10,6 @@ import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.util.Identifier;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
@@ -28,10 +25,11 @@ public class ResidueClientState {
             new CopyOnWriteArrayList<>();
 
     private static final Map<UUID, Identifier> skinTextures = new ConcurrentHashMap<>();
-
     private static final Map<UUID, Boolean> skinSlimMap = new ConcurrentHashMap<>();
 
-    private static final HttpClient HTTP = HttpClient.newHttpClient();
+    // ----------------------------------------------------------------
+    // Обновление списка обсерверов
+    // ----------------------------------------------------------------
 
     public static void updateObservers(List<ObserverListPacket.ObserverEntry> newList) {
         observers.clear();
@@ -46,70 +44,75 @@ public class ResidueClientState {
         }
     }
 
-    public static boolean isObserverSlim(UUID uuid) {
-        return skinSlimMap.getOrDefault(uuid, false);
-    }
+    // ----------------------------------------------------------------
+    // Регистрация скина
+    // ----------------------------------------------------------------
 
+    /**
+     * Декодирует base64-значение property "textures" и регистрирует текстуру.
+     * Поскольку используются только локальные скины, URL всегда имеет вид:
+     *   data:image/png;base64,<bytes>
+     */
     private static void registerSkin(UUID uuid, String name, String base64Value) {
-        // Запускаем загрузку в отдельном потоке
         Thread.ofVirtual().name("residue-skin-" + name).start(() -> {
             try {
+                // Декодируем JSON из base64-значения property
                 String decoded = new String(
                         Base64.getDecoder().decode(base64Value),
-                        StandardCharsets.UTF_8
-                );
+                        StandardCharsets.UTF_8);
 
                 JsonObject root = JsonParser.parseString(decoded).getAsJsonObject();
                 JsonObject textures = root.getAsJsonObject("textures");
-                if (textures == null || !textures.has("SKIN")) return;
+
+                if (textures == null || !textures.has("SKIN")) {
+                    Residue.LOGGER.warn("[Residue] No SKIN in textures for {}", name);
+                    return;
+                }
 
                 String skinUrl = textures.getAsJsonObject("SKIN")
                         .get("url").getAsString();
 
-                byte[] imageBytes;
-
-                if (skinUrl.startsWith("data:image/png;base64,")) {
-                    // Локальный скин — уже есть байты
-                    String imageBase64 = skinUrl.substring(
-                            "data:image/png;base64,".length());
-                    imageBytes = Base64.getDecoder().decode(imageBase64);
-                } else {
-                    // Удалённый URL — скачиваем
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(skinUrl))
-                            .GET()
-                            .build();
-                    HttpResponse<byte[]> response = HTTP.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofByteArray()
-                    );
-                    if (response.statusCode() != 200) return;
-                    imageBytes = response.body();
+                // Только data URI — никаких внешних запросов
+                if (!skinUrl.startsWith("data:image/png;base64,")) {
+                    Residue.LOGGER.warn("[Residue] Unexpected skin URL format for {}", name);
+                    return;
                 }
 
-                final byte[] finalBytes = imageBytes;
+                String imageBase64 = skinUrl.substring("data:image/png;base64,".length());
+                byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
 
                 // Регистрируем текстуру в главном потоке
                 MinecraftClient.getInstance().execute(() -> {
                     try {
-                        NativeImage image = NativeImage.read(new ByteArrayInputStream(finalBytes));
+                        NativeImage image = NativeImage.read(
+                                new ByteArrayInputStream(imageBytes));
                         NativeImageBackedTexture texture =
-                                new NativeImageBackedTexture(() -> "residue_observer_" + name, image);
-                        Identifier id = Identifier.of("residue", "observer_skin/" + name.toLowerCase());
-                        MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
+                                new NativeImageBackedTexture(
+                                        () -> "residue_observer_" + name, image);
+                        Identifier id = Identifier.of(
+                                "residue", "observer_skin/" + name.toLowerCase());
+                        MinecraftClient.getInstance()
+                                .getTextureManager()
+                                .registerTexture(id, texture);
                         skinTextures.put(uuid, id);
-                        System.out.println("[Residue] Skin registered for " + name + " → " + id); // ← есть ли этот лог?
+                        Residue.LOGGER.debug("[Residue] Skin registered for {} → {}",
+                                name, id);
                     } catch (Exception e) {
-                        System.err.println("[Residue] Failed to register skin for " + name + ": " + e.getMessage());
+                        Residue.LOGGER.warn("[Residue] Failed to register skin for {}: {}",
+                                name, e.getMessage());
                     }
                 });
 
             } catch (Exception e) {
-                System.err.println("[Residue] Failed to load skin for "
-                        + name + ": " + e.getMessage());
+                Residue.LOGGER.warn("[Residue] Failed to decode skin for {}: {}",
+                        name, e.getMessage());
             }
         });
     }
+
+    // ----------------------------------------------------------------
+    // Геттеры
+    // ----------------------------------------------------------------
 
     public static List<ObserverListPacket.ObserverEntry> getObservers() {
         return Collections.unmodifiableList(observers);
@@ -129,6 +132,10 @@ public class ResidueClientState {
 
     public static Identifier getObserverSkinTexture(UUID uuid) {
         return skinTextures.get(uuid);
+    }
+
+    public static boolean isObserverSlim(UUID uuid) {
+        return skinSlimMap.getOrDefault(uuid, false);
     }
 
     public static void clear() {

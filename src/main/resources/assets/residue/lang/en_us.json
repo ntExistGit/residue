@@ -105,5 +105,63 @@
 
   "residue.label.download.done": "§a✔ Download completed",
   "residue.label.download.cancelled": "§e✖ Download cancelled",
-  "residue.label.download.error": "§c✖ Error: %s"
+  "residue.label.download.error": "§c✖ Error: %s",
+
+
+  "residue.config.observer_stage": "Observer Distances",
+
+  "residue.config.observer_stage.0.label": "— Stage 0 (0-20% memory) —",
+  "residue.config.observer_stage.0.min_spawn_distance": "Min Spawn Distance",
+  "residue.config.observer_stage.0.min_spawn_distance.desc": "Minimum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.0.max_spawn_distance": "Max Spawn Distance",
+  "residue.config.observer_stage.0.max_spawn_distance.desc": "Maximum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.0.watch_distance": "Watch Distance",
+  "residue.config.observer_stage.0.watch_distance.desc": "Distance at which the observer freezes and stares at the player, only while the player can see it (line of sight, no obstructions). Losing sight while in this zone teleports the observer away. Set to 0 to disable this behavior for this stage.",
+  "residue.config.observer_stage.0.critical_distance": "Critical Distance",
+  "residue.config.observer_stage.0.critical_distance.desc": "Distance at which the observer teleports away immediately, regardless of whether the player can see it. Set to 0 to disable this behavior for this stage.",
+
+  "residue.config.observer_stage.1.label": "— Stage 1 (20-40% memory) —",
+  "residue.config.observer_stage.1.min_spawn_distance": "Min Spawn Distance",
+  "residue.config.observer_stage.1.min_spawn_distance.desc": "Minimum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.1.max_spawn_distance": "Max Spawn Distance",
+  "residue.config.observer_stage.1.max_spawn_distance.desc": "Maximum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.1.watch_distance": "Watch Distance",
+  "residue.config.observer_stage.1.watch_distance.desc": "Distance at which the observer freezes and stares at the player, only while the player can see it (line of sight, no obstructions). Losing sight while in this zone teleports the observer away. Set to 0 to disable this behavior for this stage.",
+  "residue.config.observer_stage.1.critical_distance": "Critical Distance",
+  "residue.config.observer_stage.1.critical_distance.desc": "Distance at which the observer teleports away immediately, regardless of whether the player can see it. Set to 0 to disable this behavior for this stage.",
+
+  "residue.config.observer_stage.2.label": "— Stage 2 (40-60% memory) —",
+  "residue.config.observer_stage.2.min_spawn_distance": "Min Spawn Distance",
+  "residue.config.observer_stage.2.min_spawn_distance.desc": "Minimum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.2.max_spawn_distance": "Max Spawn Distance",
+  "residue.config.observer_stage.2.max_spawn_distance.desc": "Maximum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.2.watch_distance": "Watch Distance",
+  "residue.config.observer_stage.2.watch_distance.desc": "Distance at which the observer freezes and stares at the player, only while the player can see it (line of sight, no obstructions). Losing sight while in this zone teleports the observer away. Set to 0 to disable this behavior for this stage.",
+  "residue.config.observer_stage.2.critical_distance": "Critical Distance",
+  "residue.config.observer_stage.2.critical_distance.desc": "Distance at which the observer teleports away immediately, regardless of whether the player can see it. Set to 0 to disable this behavior for this stage.",
+
+  "residue.config.observer_stage.3.label": "— Stage 3 (60-80% memory) —",
+  "residue.config.observer_stage.3.min_spawn_distance": "Min Spawn Distance",
+  "residue.config.observer_stage.3.min_spawn_distance.desc": "Minimum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.3.max_spawn_distance": "Max Spawn Distance",
+  "residue.config.observer_stage.3.max_spawn_distance.desc": "Maximum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.3.watch_distance": "Watch Distance",
+  "residue.config.observer_stage.3.watch_distance.desc": "Distance at which the observer freezes and stares at the player, only while the player can see it (line of sight, no obstructions). Losing sight while in this zone teleports the observer away. Set to 0 to disable this behavior for this stage.",
+  "residue.config.observer_stage.3.critical_distance": "Critical Distance",
+  "residue.config.observer_stage.3.critical_distance.desc": "Distance at which the observer teleports away immediately, regardless of whether the player can see it. Set to 0 to disable this behavior for this stage.",
+
+  "residue.config.observer_stage.4.label": "— Stage 4 (80-100% memory) —",
+  "residue.config.observer_stage.4.min_spawn_distance": "Min Spawn Distance",
+  "residue.config.observer_stage.4.min_spawn_distance.desc": "Minimum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.4.max_spawn_distance": "Max Spawn Distance",
+  "residue.config.observer_stage.4.max_spawn_distance.desc": "Maximum distance (in blocks) at which the observer entity can spawn relative to the player.",
+  "residue.config.observer_stage.4.watch_distance": "Watch Distance",
+  "residue.config.observer_stage.4.watch_distance.desc": "Distance at which the observer freezes and stares at the player, only while the player can see it (line of sight, no obstructions). Losing sight while in this zone teleports the observer away. Set to 0 to disable this behavior for this stage.",
+  "residue.config.observer_stage.4.critical_distance": "Critical Distance",
+  "residue.config.observer_stage.4.critical_distance.desc": "Distance at which the observer teleports away immediately, regardless of whether the player can see it. Set to 0 to disable this behavior for this stage.",
+
+  "residue.config.observer_raycast_ignore.label": "— Raycast Ignore List —",
+  "residue.config.observer_raycast_ignore": "Ignored Blocks",
+  "residue.config.observer_raycast_ignore.desc": "Blocks that do not block the observer's line-of-sight check. Use 'minecraft:glass' for a specific block, or '#minecraft:glass' for a tag (all blocks with that tag)."
+
 }

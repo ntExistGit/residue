@@ -8,6 +8,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResidueConfigSerializer {
 
@@ -76,11 +78,15 @@ public class ResidueConfigSerializer {
         cfg.enableMod = loaded.enableMod;
         cfg.debugMode = loaded.debugMode;
 
+        // LLM
         cfg.llmEnable = loaded.llmEnable;
         cfg.llmBackend  = loaded.llmBackend;
         cfg.llmModel = loaded.llmModel;
         cfg.customModelName = loaded.customModelName;
+        cfg.llmLang = loaded.llmLang;
+        cfg.llmThink = loaded.llmThink;
         cfg.huggingFaceToken = loaded.huggingFaceToken;
+        cfg.maxHistorySize = loaded.maxHistorySize;
 
         // Memory
         cfg.memoryIncreaseSeconds = loaded.memoryIncreaseSeconds;
@@ -137,5 +143,36 @@ public class ResidueConfigSerializer {
         // Dream
         cfg.dreamMemoryMin = loaded.dreamMemoryMin;
         cfg.dreamMemoryMax = loaded.dreamMemoryMax;
+
+        // Observer Entity — per-stage distances
+        cfg.observerStage0MinSpawnDistance = loaded.observerStage0MinSpawnDistance;
+        cfg.observerStage0MaxSpawnDistance = loaded.observerStage0MaxSpawnDistance;
+        cfg.observerStage0WatchDistance = loaded.observerStage0WatchDistance;
+        cfg.observerStage0CriticalDistance = loaded.observerStage0CriticalDistance;
+
+        cfg.observerStage1MinSpawnDistance = loaded.observerStage1MinSpawnDistance;
+        cfg.observerStage1MaxSpawnDistance = loaded.observerStage1MaxSpawnDistance;
+        cfg.observerStage1WatchDistance = loaded.observerStage1WatchDistance;
+        cfg.observerStage1CriticalDistance = loaded.observerStage1CriticalDistance;
+
+        cfg.observerStage2MinSpawnDistance = loaded.observerStage2MinSpawnDistance;
+        cfg.observerStage2MaxSpawnDistance = loaded.observerStage2MaxSpawnDistance;
+        cfg.observerStage2WatchDistance = loaded.observerStage2WatchDistance;
+        cfg.observerStage2CriticalDistance = loaded.observerStage2CriticalDistance;
+
+        cfg.observerStage3MinSpawnDistance = loaded.observerStage3MinSpawnDistance;
+        cfg.observerStage3MaxSpawnDistance = loaded.observerStage3MaxSpawnDistance;
+        cfg.observerStage3WatchDistance = loaded.observerStage3WatchDistance;
+        cfg.observerStage3CriticalDistance = loaded.observerStage3CriticalDistance;
+
+        cfg.observerStage4MinSpawnDistance = loaded.observerStage4MinSpawnDistance;
+        cfg.observerStage4MaxSpawnDistance = loaded.observerStage4MaxSpawnDistance;
+        cfg.observerStage4WatchDistance = loaded.observerStage4WatchDistance;
+        cfg.observerStage4CriticalDistance = loaded.observerStage4CriticalDistance;
+
+        cfg.observerRaycastAngleDegrees = loaded.observerRaycastAngleDegrees;
+        cfg.observerRaycastIgnoreBlocks = loaded.observerRaycastIgnoreBlocks != null
+                ? loaded.observerRaycastIgnoreBlocks
+                : RaycastIgnore.getAllRawIds();
     }
 }

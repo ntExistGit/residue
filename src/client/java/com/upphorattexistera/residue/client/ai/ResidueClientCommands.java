@@ -21,52 +21,58 @@ public class ResidueClientCommands {
 
     public static void register() {
         registerPacketHandlers();
+        registerCommands();
+    }
 
+    // ----------------------------------------------------------------
+    // Команды /msg, /tell, /w
+    // ----------------------------------------------------------------
+
+    private static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            // Перехватываем /msg, /tell, /w на клиенте
+
             var msgNode = literal("msg")
                     .then(argument("target", StringArgumentType.word())
                             .suggests((context, builder) -> {
-                                ResidueClientState.getObservers().forEach(entry ->
-                                        builder.suggest(entry.name()));
+                                ResidueClientState.getObservers().forEach(e ->
+                                        builder.suggest(e.name()));
                                 return builder.buildFuture();
                             })
                             .then(argument("message", StringArgumentType.greedyString())
                                     .executes(context -> {
-                                        String target = StringArgumentType.getString(context, "target");
+                                        String target  = StringArgumentType.getString(context, "target");
                                         String message = StringArgumentType.getString(context, "message");
 
-                                        boolean isObserver = ResidueClientState.getObservers()
-                                                .stream()
+                                        boolean isObserver = ResidueClientState.getObservers().stream()
                                                 .anyMatch(e -> e.name().equalsIgnoreCase(target));
 
-                                        if (isObserver) {
-                                            String observerName = ResidueClientState.getObservers()
-                                                    .stream()
-                                                    .filter(e -> e.name().equalsIgnoreCase(target))
-                                                    .findFirst()
-                                                    .map(ObserverListPacket.ObserverEntry::name)
-                                                    .orElse(target);
-
-                                            MinecraftClient client = context.getSource().getClient();
-                                            client.execute(() -> {
-                                                if (client.player != null) {
-                                                    MessageType.Parameters params = MessageType.params(MessageType.MSG_COMMAND_OUTGOING, client.player)
-                                                            .withTargetName(Text.literal(observerName));
-
-                                                    Text formattedMessage = params.applyChatDecoration(Text.literal(message));
-
-                                                    client.player.sendMessage(formattedMessage);
-                                                }
-                                            });
-
-                                            ClientPlayNetworking.send(
-                                                    new ObserverMessageRequestPacket.Payload(observerName, message));
-
-                                            return 1;
+                                        if (!isObserver) {
+                                            throw EntityArgumentType.PLAYER_NOT_FOUND_EXCEPTION.create();
                                         }
 
-                                        throw EntityArgumentType.PLAYER_NOT_FOUND_EXCEPTION.create();
+                                        String observerName = ResidueClientState.getObservers().stream()
+                                                .filter(e -> e.name().equalsIgnoreCase(target))
+                                                .findFirst()
+                                                .map(ObserverListPacket.ObserverEntry::name)
+                                                .orElse(target);
+
+                                        MinecraftClient client = context.getSource().getClient();
+
+                                        client.execute(() -> {
+                                            if (client.player == null) return;
+                                            MessageType.Parameters params = MessageType
+                                                    .params(MessageType.MSG_COMMAND_OUTGOING, client.player)
+                                                    .withTargetName(Text.literal(observerName));
+                                            client.player.sendMessage(
+                                                    params.applyChatDecoration(Text.literal(message)));
+                                        });
+
+                                        // isPublic = false — личное сообщение
+                                        ClientPlayNetworking.send(
+                                                new ObserverMessageRequestPacket.Payload(
+                                                        observerName, message, false));
+
+                                        return 1;
                                     })
                             )
                     );
@@ -77,43 +83,70 @@ public class ResidueClientCommands {
         });
     }
 
+    // ----------------------------------------------------------------
+    // Обработка входящего ответа от обсервера
+    // ----------------------------------------------------------------
+
     private static void registerPacketHandlers() {
         ClientPlayNetworking.registerGlobalReceiver(
                 ObserverMessagePacket.ID,
                 (payload, context) -> {
-                    String observerName = payload.observerName();
-                    String playerMessage = payload.playerMessage();
-                    String systemPrompt  = payload.systemPrompt();
-                    double temperature   = payload.temperature();
-                    int maxTokens        = payload.maxTokens();
-                    String historyJson   = payload.historyJson();
+                    String  observerName  = payload.observerName();
+                    String  playerMessage = payload.playerMessage();
+                    String  systemPrompt  = payload.systemPrompt();
+                    double  temperature   = payload.temperature();
+                    int     maxTokens     = payload.maxTokens();
+                    String  historyJson   = payload.historyJson();
+                    boolean isPublic      = payload.isPublic();
 
-                    Thread.ofVirtual().name("residue-observer-reply").start(() -> {
+                    Thread.ofVirtual().name("residue-observer-reply-" + observerName).start(() -> {
                         String reply = ChatAI.askAsObserver(
                                 observerName, playerMessage,
                                 systemPrompt, temperature, maxTokens, historyJson);
 
+                        if (reply == null) return;
+
                         context.client().execute(() -> {
                             if (context.client().player == null) return;
 
-                            if (reply != null) {
-                                var registryManager = Objects.requireNonNull(
-                                        context.client().world).getRegistryManager();
-
-                                MessageType.Parameters params = MessageType.params(
-                                        MessageType.MSG_COMMAND_INCOMING,
-                                        registryManager,
-                                        Text.literal(observerName)
-                                );
-
-                                Text formattedReply = params.applyChatDecoration(
-                                        Text.literal(reply));
-                                Objects.requireNonNull(context.client().player)
-                                        .sendMessage(formattedReply);
+                            if (isPublic) {
+                                sendPublicReply(context.client(), observerName, reply);
+                            } else {
+                                sendPrivateReply(context.client(), observerName, reply);
                             }
                         });
                     });
                 }
         );
+    }
+
+    // ----------------------------------------------------------------
+    // Публичный ответ (общий чат)
+    // ----------------------------------------------------------------
+
+    private static void sendPublicReply(MinecraftClient client, String observerName, String reply) {
+        var registryManager = Objects.requireNonNull(client.world).getRegistryManager();
+
+        MessageType.Parameters params = MessageType.params(
+                MessageType.CHAT,
+                registryManager,
+                Text.literal(observerName));
+
+        client.player.sendMessage(params.applyChatDecoration(Text.literal(reply)));
+    }
+
+    // ----------------------------------------------------------------
+    // Личный ответ (/msg)
+    // ----------------------------------------------------------------
+
+    private static void sendPrivateReply(MinecraftClient client, String observerName, String reply) {
+        var registryManager = Objects.requireNonNull(client.world).getRegistryManager();
+
+        MessageType.Parameters params = MessageType.params(
+                MessageType.MSG_COMMAND_INCOMING,
+                registryManager,
+                Text.literal(observerName));
+
+        client.player.sendMessage(params.applyChatDecoration(Text.literal(reply)));
     }
 }

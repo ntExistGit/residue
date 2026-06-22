@@ -49,6 +49,12 @@
         "catalogue": {
           "banner": "assets/residue/residue_banner.png",
           "background": "assets/residue/residue_background.png"
-        }
+        },
+        "fabric:resource_packs": [
+            {
+                "id": "Residue",
+                "name": "Residue"
+            }
+        ]
     }
 }

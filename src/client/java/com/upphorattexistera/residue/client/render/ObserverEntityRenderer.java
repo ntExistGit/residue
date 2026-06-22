@@ -10,6 +10,7 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.player.PlayerSkinType;
 import net.minecraft.entity.player.SkinTextures;
+import net.minecraft.text.Text;
 import net.minecraft.util.AssetInfo;
 import net.minecraft.util.Identifier;
 
@@ -55,6 +56,12 @@ public class ObserverEntityRenderer
         state.rightPantsLegVisible = true;
         state.capeVisible = false;
         state.spectator = false;
+
+        // Имя обсервера должно быть видно всегда, независимо от
+        // настроек клиента "показывать имена" — это часть атмосферы:
+        // игрок должен точно знать, кто на него смотрит.
+        //state.nameLabelVisible = true;
+        //state.displayName = Text.literal(entity.getObserverName());
 
         Identifier skinId = FALLBACK_SKIN;
         boolean isSlim = false;
