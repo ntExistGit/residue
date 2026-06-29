@@ -47,7 +47,7 @@ public class SelfCloneEvent {
         boolean isNight = world.getLevelProperties().getTime() % 24000 > 13000;
 
         // placeholder — в будущем заменить на настоящий визуальный двойник
-        Residue.LOGGER.info("[Residue] Clone spotted near {} {}",
+        Residue.LOGGER.info("[residue] Clone spotted near {} {}",
                 player.getName().getString(),
                 isNight ? "(carrying torch)" : "");
 

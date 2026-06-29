@@ -22,6 +22,41 @@ public class ResidueClientCommands {
     public static void register() {
         registerPacketHandlers();
         registerCommands();
+        registerLlmCommands();
+    }
+
+    // ----------------------------------------------------------------
+    // Команды /residueai start | stop | toggle | status
+    // ----------------------------------------------------------------
+
+    private static void registerLlmCommands() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(literal("residueai")
+                    .then(literal("start").executes(ctx -> {
+                        LLMServerController.start(null);
+                        return 1;
+                    }))
+                    .then(literal("stop").executes(ctx -> {
+                        LLMServerController.stop(null);
+                        return 1;
+                    }))
+                    .then(literal("toggle").executes(ctx -> {
+                        LLMServerController.toggle(null);
+                        return 1;
+                    }))
+                    .then(literal("status").executes(ctx -> {
+                        boolean running = LLMServerManager.getInstance().isRunning();
+                        MinecraftClient client = MinecraftClient.getInstance();
+                        if (client.player != null) {
+                            client.player.sendMessage(Text.literal(
+                                    running
+                                            ? "§a[Residue] AI server is running."
+                                            : "§c[Residue] AI server is stopped."));
+                        }
+                        return 1;
+                    }))
+            );
+        });
     }
 
     // ----------------------------------------------------------------

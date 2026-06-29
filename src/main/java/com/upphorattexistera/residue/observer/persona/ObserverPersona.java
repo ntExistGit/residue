@@ -1,6 +1,6 @@
 package com.upphorattexistera.residue.observer.persona;
 
-import com.upphorattexistera.residue.config.LLMLanguage; // <-- Добавляем импорт
+import com.upphorattexistera.residue.config.Language;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,30 +8,26 @@ import java.util.Set;
 public class ObserverPersona {
 
     public final int id;
-    public final String gender;
     public final Set<String> types;
     public final double temperature;
     public final int maxTokens;
     public final Map<Integer, List<String>> stages;
 
-    public ObserverPersona(int id, String gender, Set<String> types,
+    public ObserverPersona(int id, Set<String> types,
                            double temperature, int maxTokens,
                            Map<Integer, List<String>> stages) {
         this.id = id;
-        this.gender = gender;
         this.types = types;
         this.temperature = temperature;
         this.maxTokens = maxTokens;
         this.stages = stages;
     }
 
-    // 1. Добавляем параметр LLMLanguage в сигнатуру метода
-    public String buildPrompt(String observerName, int stage, String playerName, LLMLanguage language) {
+    public String buildPrompt(String observerName, int stage, String playerName,
+                              Language language, ObserverGender gender) {
 
-        // Небольшая защита от null, если язык не передался
-        if (language == null) {
-            language = LLMLanguage.ENGLISH;
-        }
+        if (language == null) language = Language.ENGLISH;
+        if (gender == null) gender = ObserverGender.AMBIGUOUS;
 
         List<String> lines = stages.getOrDefault(stage, stages.get(0));
         if (lines == null || lines.isEmpty()) {
@@ -48,9 +44,10 @@ public class ObserverPersona {
             prompt.append(globalRules);
         }
 
-        // 2. --- НОВАЯ ЧАСТЬ: Инъекция языка в самом конце ---
-        // Выделяем это как строгую системную инструкцию.
-        prompt.append("\n\n[CRITICAL SYSTEM INSTRUCTION]: ")
+        prompt.append("\n\n[CRITICAL SYSTEM INSTRUCTION — GENDER]: ")
+                .append(gender.instruction);
+
+        prompt.append("\n\n[CRITICAL SYSTEM INSTRUCTION — LANGUAGE]: ")
                 .append(language.selectLanguage());
 
         return prompt.toString();

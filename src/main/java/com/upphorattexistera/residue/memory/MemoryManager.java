@@ -95,9 +95,9 @@ public class MemoryManager {
             System.arraycopy(encrypted, 0, result, iv.length, encrypted.length);
 
             Files.write(savePath, result);
-            Residue.LOGGER.info("[Residue] Memory saved (encrypted)");
+            Residue.LOGGER.info("[residue] Memory saved (encrypted)");
         } catch (Exception e) {
-            Residue.LOGGER.warn("[Residue] Failed to save memory: {}", e.getMessage());
+            Residue.LOGGER.warn("[residue] Failed to save memory: {}", e.getMessage());
         }
     }
 
@@ -121,9 +121,9 @@ public class MemoryManager {
             int max = ResidueConfig.INSTANCE.maxMemory;
             globalMemory.set(Math.min(saved, max));
             WorldState.memory = globalMemory.get();
-            Residue.LOGGER.info("[Residue] Memory loaded (decrypted): {}", globalMemory.get());
+            Residue.LOGGER.info("[residue] Memory loaded (decrypted): {}", globalMemory.get());
         } catch (Exception e) {
-            Residue.LOGGER.warn("[Residue] Failed to load memory: {}", e.getMessage());
+            Residue.LOGGER.warn("[residue] Failed to load memory: {}", e.getMessage());
         }
     }
 

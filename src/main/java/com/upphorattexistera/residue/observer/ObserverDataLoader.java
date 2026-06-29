@@ -32,7 +32,7 @@ public class ObserverDataLoader {
 
             if (resource.isEmpty()) {
 
-                Residue.LOGGER.warn("[Residue] observers.json not found");
+                Residue.LOGGER.warn("[residue] observers.json not found");
 
                 return new ObserverDatabase();
             }

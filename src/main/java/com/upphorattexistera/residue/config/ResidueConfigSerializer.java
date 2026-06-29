@@ -3,90 +3,68 @@ package com.upphorattexistera.residue.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ResidueConfigSerializer {
-
-    private static final Gson GSON =
-            new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create();
-
-    private static final Path CONFIG_PATH =
-            FabricLoader.getInstance()
-                    .getConfigDir()
-                    .resolve("residue.json");
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("residue.json");
 
     public static void load() {
-
         try {
-
             if (!Files.exists(CONFIG_PATH)) {
                 save();
                 return;
             }
-
             Reader reader = Files.newBufferedReader(CONFIG_PATH);
-
-            ResidueConfig loaded =
-                    GSON.fromJson(reader, ResidueConfig.class);
-
+            ResidueConfig loaded = GSON.fromJson(reader, ResidueConfig.class);
             reader.close();
-
             if (loaded == null) {
                 save();
                 return;
             }
-
             copy(loaded);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void save() {
-
         try {
-
-            Writer writer =
-                    Files.newBufferedWriter(CONFIG_PATH);
-
-            GSON.toJson(
-                    ResidueConfig.INSTANCE,
-                    writer
-            );
-
+            Writer writer = Files.newBufferedWriter(CONFIG_PATH);
+            GSON.toJson(ResidueConfig.INSTANCE, writer);
             writer.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private static void copy(ResidueConfig loaded) {
-
         ResidueConfig cfg = ResidueConfig.INSTANCE;
 
         // General
         cfg.enableMod = loaded.enableMod;
         cfg.debugMode = loaded.debugMode;
+        cfg.language = loaded.language != null ? loaded.language : Language.ENGLISH;
 
         // LLM
         cfg.llmEnable = loaded.llmEnable;
-        cfg.llmBackend  = loaded.llmBackend;
+        cfg.llmBackend = loaded.llmBackend;
         cfg.llmModel = loaded.llmModel;
         cfg.customModelName = loaded.customModelName;
-        cfg.llmLang = loaded.llmLang;
         cfg.llmThink = loaded.llmThink;
         cfg.huggingFaceToken = loaded.huggingFaceToken;
         cfg.maxHistorySize = loaded.maxHistorySize;
+
+        // TTS
+        cfg.ttsEnable = loaded.ttsEnable;
+        cfg.ttsTokenizer = loaded.ttsTokenizer != null ? loaded.ttsTokenizer : TTSTokenizer.Q4_K_M;
+        cfg.ttsTalker = loaded.ttsTalker != null ? loaded.ttsTalker : TTSTalker.QWEN_TALKER_1_7B_CUSTOM_Q4;
+        cfg.ttsCustomTokenizerName = loaded.ttsCustomTokenizerName;
+        cfg.ttsCustomTalkerName = loaded.ttsCustomTalkerName;
+        cfg.ttsDefaultSpeaker = loaded.ttsDefaultSpeaker;
 
         // Memory
         cfg.memoryIncreaseSeconds = loaded.memoryIncreaseSeconds;
@@ -174,5 +152,14 @@ public class ResidueConfigSerializer {
         cfg.observerRaycastIgnoreBlocks = loaded.observerRaycastIgnoreBlocks != null
                 ? loaded.observerRaycastIgnoreBlocks
                 : RaycastIgnore.getAllRawIds();
+
+        // Observer Work
+        cfg.enableObserverWork = loaded.enableObserverWork;
+        cfg.observerWorkRadius = loaded.observerWorkRadius;
+        cfg.observerWorkDurationTicks = loaded.observerWorkDurationTicks;
+        cfg.observerWorkMaxBlocksPerSession = loaded.observerWorkMaxBlocksPerSession;
+        cfg.observerWorkChancePerSecond = loaded.observerWorkChancePerSecond;
+        cfg.observerWorkDropItems = loaded.observerWorkDropItems;
+        cfg.observerCanPickUpLoot = loaded.observerCanPickUpLoot;
     }
 }

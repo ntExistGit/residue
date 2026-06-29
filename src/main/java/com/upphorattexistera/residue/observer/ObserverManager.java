@@ -53,7 +53,7 @@ public class ObserverManager {
                 .toList();
 
         if (unused.isEmpty()) {
-            Residue.LOGGER.info("[Residue] All observers used, resetting");
+            Residue.LOGGER.info("[residue] All observers used, resetting");
             database.observers.forEach(o -> o.setUsed(false));
             unused = database.observers.stream()
                     .filter(o -> !o.isUsed())

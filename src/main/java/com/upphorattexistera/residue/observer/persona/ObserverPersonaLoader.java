@@ -32,7 +32,7 @@ public class ObserverPersonaLoader {
             InputStream stream;
             if (Files.exists(external)) {
                 stream = Files.newInputStream(external);
-                Residue.LOGGER.info("[Residue] Loaded observer_personas.json from config");
+                Residue.LOGGER.info("[residue] Loaded observer_personas.json from config");
             } else {
                 // Загружаем из ресурсов мода
                 Optional<ModContainer> mod = FabricLoader.getInstance()
@@ -42,11 +42,11 @@ public class ObserverPersonaLoader {
                 Optional<Path> path = mod.get()
                         .findPath("assets/residue/observer_personas.json");
                 if (path.isEmpty()) {
-                    Residue.LOGGER.warn("[Residue] observer_personas.json not found in assets");
+                    Residue.LOGGER.warn("[residue] observer_personas.json not found in assets");
                     return;
                 }
                 stream = Files.newInputStream(path.get());
-                Residue.LOGGER.info("[Residue] Loaded observer_personas.json from assets");
+                Residue.LOGGER.info("[residue] Loaded observer_personas.json from assets");
             }
 
             JsonObject root = JsonParser.parseReader(
@@ -57,7 +57,6 @@ public class ObserverPersonaLoader {
                 JsonObject obj = elem.getAsJsonObject();
 
                 int id = obj.get("id").getAsInt();
-                String gender = obj.get("gender").getAsString();
                 double temperature = obj.get("temperature").getAsDouble();
                 int maxTokens = obj.get("max_tokens").getAsInt();
 
@@ -80,13 +79,12 @@ public class ObserverPersonaLoader {
                     if (!trimmed.isEmpty()) types.add(trimmed);
                 }
 
-                personas.add(new ObserverPersona(id, gender, types, temperature, maxTokens, stages));
+                personas.add(new ObserverPersona(id, types, temperature, maxTokens, stages));
 
-                Residue.LOGGER.debug("[Residue] Loaded persona id={} gender={}",
-                        id, gender);
+                Residue.LOGGER.debug("[Residue] Loaded persona id={}", id);
             }
 
-            Residue.LOGGER.info("[Residue] Loaded {} observer personas", personas.size());
+            Residue.LOGGER.info("[residue] Loaded {} observer personas", personas.size());
 
             if (root.has("global_rules")) {
                 List<String> rules = new ArrayList<>();
@@ -97,7 +95,7 @@ public class ObserverPersonaLoader {
             }
 
         } catch (Exception e) {
-            Residue.LOGGER.error("[Residue] Failed to load observer_personas.json: {}",
+            Residue.LOGGER.error("[residue] Failed to load observer_personas.json: {}",
                     e.getMessage());
         }
     }

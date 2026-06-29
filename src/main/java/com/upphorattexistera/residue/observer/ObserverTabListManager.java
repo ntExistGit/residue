@@ -21,6 +21,43 @@ import java.util.UUID;
 
 public class ObserverTabListManager {
 
+    /**
+     * РУЧНАЯ СБОРКА PlayerListS2CPacket.
+     *
+     * Причина: PlayerListS2CPacket не имеет публичного конструктора,
+     * принимающего произвольный Entry с кастомным GameProfile/скином —
+     * единственный способ создать "виртуального" игрока в tab-list — это
+     * собрать байты в том же порядке, в котором их ожидает PlayerListS2CPacket.CODEC.
+     *
+     * ВАЖНО ДЛЯ БУДУЩИХ ОБНОВЛЕНИЙ МАППИНГОВ (Modern Yarn):
+     * Зафиксировано под minecraft_version=26.1.2, yarn_mappings=26.1.2+build.3.
+     * Если после апдейта маппингов или версии MC игроки-обсерверы перестали
+     * появляться в tab-листе (или клиент крашится при decode/encode этого
+     * пакета) — ПЕРВЫМ ДЕЛОм проверяйте порядок полей ниже, сверяя его
+     * с реализацией PlayerListS2CPacket.CODEC в декомпилированном клиенте
+     * новой версии. Порядок полей ОБЯЗАН совпадать байт-в-байт:
+     *
+     *   1. EnumSet<Action>                  — writeEnumSet
+     *   2. varint: количество записей (= 1)
+     *   3. UUID игрока
+     *   4. [ADD_PLAYER]      имя профиля     — PacketCodecs.PLAYER_NAME
+     *   5. [ADD_PLAYER]      PropertyMap     — PacketCodecs.PROPERTY_MAP
+     *   6. [UPDATE_LISTED]   boolean
+     *   7. [UPDATE_GAME_MODE] varint (GameMode.getIndex())
+     *   8. [UPDATE_LATENCY]  varint (ping)
+     *   9. [UPDATE_HAT]      boolean
+     *
+     * Порядок полей 4-9 соответствует порядку самого EnumSet ACTIONS ниже —
+     * если поменяете порядок ACTIONS, обязаны поменять и порядок записи байт.
+     */
+    private static final EnumSet<PlayerListS2CPacket.Action> ACTIONS = EnumSet.of(
+            PlayerListS2CPacket.Action.ADD_PLAYER,
+            PlayerListS2CPacket.Action.UPDATE_LISTED,
+            PlayerListS2CPacket.Action.UPDATE_GAME_MODE,
+            PlayerListS2CPacket.Action.UPDATE_LATENCY,
+            PlayerListS2CPacket.Action.UPDATE_HAT
+    );
+
     public static UUID uuidFromName(String name) {
         return UUID.nameUUIDFromBytes(
                 ("ResidueObserver:" + name).getBytes(StandardCharsets.UTF_8)
@@ -53,10 +90,11 @@ public class ObserverTabListManager {
 
     private static PlayerListS2CPacket buildAddPacket(MinecraftServer server, Observer observer) {
 
+        RegistryByteBuf buf = null;
+
         try {
             UUID uuid = uuidFromName(observer.getName());
 
-            // строим GameProfile — добавляем скин если уже нашли
             SkinData skinData = ObserverSkinResolver.getCached(observer.getName());
 
             PropertyMap propertyMap;
@@ -71,20 +109,13 @@ public class ObserverTabListManager {
 
             GameProfile profile = new GameProfile(uuid, observer.getName(), propertyMap);
 
-            EnumSet<PlayerListS2CPacket.Action> actions = EnumSet.of(
-                    PlayerListS2CPacket.Action.ADD_PLAYER,
-                    PlayerListS2CPacket.Action.UPDATE_LISTED,
-                    PlayerListS2CPacket.Action.UPDATE_GAME_MODE,
-                    PlayerListS2CPacket.Action.UPDATE_LATENCY,
-                    PlayerListS2CPacket.Action.UPDATE_HAT
-            );
-
-            RegistryByteBuf buf = new RegistryByteBuf(
+            buf = new RegistryByteBuf(
                     Unpooled.buffer(),
                     server.getRegistryManager()
             );
 
-            buf.writeEnumSet(actions, PlayerListS2CPacket.Action.class);
+            // См. javadoc класса — порядок полей ниже зафиксирован под текущие маппинги.
+            buf.writeEnumSet(ACTIONS, PlayerListS2CPacket.Action.class);
             buf.writeVarInt(1);
             buf.writeUuid(uuid);
 
@@ -104,15 +135,15 @@ public class ObserverTabListManager {
             // UPDATE_HAT
             buf.writeBoolean(true);
 
-            PlayerListS2CPacket packet = PlayerListS2CPacket.CODEC.decode(buf);
-            buf.release();
-            return packet;
+            return PlayerListS2CPacket.CODEC.decode(buf);
 
         } catch (Exception e) {
-            Residue.LOGGER.warn("[Residue] Failed to build tab list packet for {}: {}",
-                    observer.getName(), e.getMessage());
-            e.printStackTrace();
+            Residue.LOGGER.error(
+                    "[Residue] Failed to build tab list packet for '{}'.",
+                    observer.getName(), e);
             return null;
+        } finally {
+            if (buf != null) buf.release();
         }
     }
 

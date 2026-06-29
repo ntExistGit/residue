@@ -73,9 +73,9 @@ public final class ObserverStageCategory {
         builder.option(LabelOption.create(Text.translatable("residue.config.observer_raycast_ignore.label")));
 
         builder.option(Option.<Float>createBuilder()
-                .name(Text.translatable(""))
+                .name(Text.translatable("residue.config.observer_raycast_angle"))
                 .description(OptionDescription.of(
-                        Text.translatable("")))
+                        Text.translatable("residue.config.observer_raycast_angle.desc")))
                 .binding(120.0f,
                         () -> ResidueConfig.INSTANCE.observerRaycastAngleDegrees,
                         value -> ResidueConfig.INSTANCE.observerRaycastAngleDegrees = value)

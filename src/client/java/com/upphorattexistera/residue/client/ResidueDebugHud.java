@@ -3,6 +3,7 @@ package com.upphorattexistera.residue.client;
 import com.upphorattexistera.residue.WorldState;
 import com.upphorattexistera.residue.config.ResidueConfig;
 import com.upphorattexistera.residue.memory.MemoryManager;
+import com.upphorattexistera.residue.memory.MemoryStage;
 import com.upphorattexistera.residue.observer.ObserverSessionManager;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -95,16 +96,13 @@ public class ResidueDebugHud implements HudElement {
     }
 
     private static String getStage(int memory, int max) {
-        int s1 = (int) (max * 0.20);
-        int s2 = (int) (max * 0.40);
-        int s3 = (int) (max * 0.60);
-        int s4 = (int) (max * 0.80);
-
-        if (memory < s1) return "0 — dormant";
-        if (memory < s2) return "1 — echo";
-        if (memory < s3) return "2 — presence";
-        if (memory < s4) return "3 — fracture";
-        return "4 — critical";
+        return switch (MemoryStage.getStage(memory, max)) {
+            case 0 -> "0 — dormant";
+            case 1 -> "1 — echo";
+            case 2 -> "2 — presence";
+            case 3 -> "3 — fracture";
+            default -> "4 — critical";
+        };
     }
 
     private record Line(String text, int color, boolean bold) {}

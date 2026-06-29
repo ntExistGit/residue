@@ -78,7 +78,7 @@ public class DistantTorchEvent {
         world.setBlockState(targetPos, Blocks.TORCH.getDefaultState());
         torches.put(targetPos, data);
 
-        Residue.LOGGER.info("[Residue] Torch spawned at x={} y={} z={} dim={}",
+        Residue.LOGGER.info("[residue] Torch spawned at x={} y={} z={} dim={}",
                 targetPos.getX(), targetPos.getY(), targetPos.getZ(), data.dimension);
     }
 

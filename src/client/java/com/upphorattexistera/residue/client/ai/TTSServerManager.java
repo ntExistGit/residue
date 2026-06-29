@@ -2,8 +2,9 @@ package com.upphorattexistera.residue.client.ai;
 
 import com.upphorattexistera.residue.config.DownloadStatusLabel;
 import com.upphorattexistera.residue.config.LLMBackend;
-import com.upphorattexistera.residue.config.LLMModel;
 import com.upphorattexistera.residue.config.ResidueConfig;
+import com.upphorattexistera.residue.config.TTSTalker;
+import com.upphorattexistera.residue.config.TTSTokenizer;
 import net.minecraft.text.Text;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -14,12 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class LLMServerManager {
+public class TTSServerManager {
     private static class Holder {
-        static final LLMServerManager INSTANCE = new LLMServerManager();
+        static final TTSServerManager INSTANCE = new TTSServerManager();
     }
 
-    public static LLMServerManager getInstance() {
+    public static TTSServerManager getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -27,8 +28,8 @@ public class LLMServerManager {
     private boolean isRunning = false;
 
     private final Path baseDir = Paths.get("residue_ai");
-    private final Path serverDir = baseDir.resolve("llm_server");
-    private final Path modelsDir = baseDir.resolve("models/llm");
+    private final Path ttsDir = baseDir.resolve("tts_server");
+    private final Path modelsDir = baseDir.resolve("models/tts");
 
     private volatile DownloadStatusLabel statusLabel;
     private final AtomicBoolean downloadCancelled = new AtomicBoolean(false);
@@ -53,7 +54,7 @@ public class LLMServerManager {
         Thread t = downloadThread;
         if (t != null && t.isAlive()) t.interrupt();
         if (statusLabel != null) statusLabel.setState(DownloadStatusLabel.State.CANCELLED);
-        System.out.println("[ResidueAI] Download cancelled by user");
+        System.out.println("[ResidueAI] TTS download cancelled by user");
     }
 
     public void downloadAndSetup() throws Exception {
@@ -62,114 +63,140 @@ public class LLMServerManager {
 
         if (statusLabel != null) statusLabel.setProgress(0);
 
-        Files.createDirectories(serverDir);
+        Files.createDirectories(ttsDir);
         Files.createDirectories(modelsDir);
 
-        LLMModel model = ResidueConfig.INSTANCE.llmModel;
-        Path resolvedModelPath;
-        String modelUrl;
-
-        if (model == LLMModel.CUSTOM) {
-            String customName = ResidueConfig.INSTANCE.customModelName;
+        // Tokenizer
+        TTSTokenizer tokenizer = ResidueConfig.INSTANCE.ttsTokenizer;
+        Path resolvedTokenizerPath;
+        String tokenizerUrl;
+        if (tokenizer == TTSTokenizer.CUSTOM) {
+            String customName = ResidueConfig.INSTANCE.ttsCustomTokenizerName;
             if (customName == null || customName.isBlank()) {
-                if (statusLabel != null) statusLabel.setError(
-                        Text.translatable("residue.error.custom_model_required").getString());
-                throw new Exception("Custom model: please specify filename (customModelName) in settings. " +
-                        "File should be placed in: " + modelsDir.toAbsolutePath());
+                if (statusLabel != null) statusLabel.setError("Custom tokenizer name is empty");
+                throw new Exception("Custom tokenizer: please specify filename in settings.");
             }
-            resolvedModelPath = modelsDir.resolve(customName);
-            modelUrl = "";
+            resolvedTokenizerPath = modelsDir.resolve(customName);
+            tokenizerUrl = "";
         } else {
-            resolvedModelPath = modelsDir.resolve(model.fileName);
-            modelUrl = model.downloadUrl;
+            resolvedTokenizerPath = modelsDir.resolve(tokenizer.fileName);
+            tokenizerUrl = tokenizer.downloadUrl;
         }
 
-        boolean needBackend = !Files.exists(serverDir.resolve("llama-server.exe"));
-        boolean needModel = !Files.exists(resolvedModelPath) && !modelUrl.isEmpty();
+        // Talker
+        TTSTalker talker = ResidueConfig.INSTANCE.ttsTalker;
+        Path resolvedTalkerPath;
+        String talkerUrl;
+        if (talker == TTSTalker.CUSTOM) {
+            String customName = ResidueConfig.INSTANCE.ttsCustomTalkerName;
+            if (customName == null || customName.isBlank()) {
+                if (statusLabel != null) statusLabel.setError("Custom talker name is empty");
+                throw new Exception("Custom talker: please specify filename in settings.");
+            }
+            resolvedTalkerPath = modelsDir.resolve(customName);
+            talkerUrl = "";
+        } else {
+            resolvedTalkerPath = modelsDir.resolve(talker.fileName);
+            talkerUrl = talker.downloadUrl;
+        }
 
-        if (!needBackend && !needModel) {
-            System.out.println("[ResidueAI] All files already exist, skipping download");
+        boolean needBackend = !Files.exists(ttsDir.resolve("tts-server.exe"));
+        boolean needTokenizer = !Files.exists(resolvedTokenizerPath) && !tokenizerUrl.isEmpty();
+        boolean needTalker = !Files.exists(resolvedTalkerPath) && !talkerUrl.isEmpty();
+
+        if (!needBackend && !needTokenizer && !needTalker) {
+            System.out.println("[ResidueAI] TTS files already exist, skipping download");
             if (statusLabel != null) statusLabel.setState(DownloadStatusLabel.State.DONE);
             return;
         }
 
-        int totalSteps = (needBackend ? 1 : 0) + (needModel ? 1 : 0);
+        int totalSteps = (needBackend ? 1 : 0) + (needTokenizer ? 1 : 0) + (needTalker ? 1 : 0);
         int currentStep = 0;
 
+        // 1. Backend
         if (needBackend) {
             checkCancelled();
-
-            LLMBackend backend = ResidueConfig.INSTANCE.llmBackend;
-            if (backend == LLMBackend.AUTO) backend = detectBestBackend();
-
-            String zipUrl = backend.getDownloadUrl();
-            if (zipUrl == null || zipUrl.isBlank())
-                throw new Exception("Failed to get download URL for backend: " + backend.displayName);
-
-            System.out.println("[ResidueAI] Downloading backend: " + backend.displayName);
-            Path zipPath = baseDir.resolve("llama-server.zip");
+            String zipUrl = "https://github.com/ntExistGit/qwentts.cpp/releases/download/1.0/qwen-tts.zip";
+            System.out.println("[ResidueAI] Downloading TTS backend...");
+            Path zipPath = baseDir.resolve("qwen-tts.zip");
 
             try {
                 downloadFile(zipUrl, zipPath, currentStep, totalSteps);
                 checkCancelled();
-                extractZip(zipPath, serverDir);
+                extractZipFlat(zipPath, ttsDir); // Распаковываем в корень ttsDir
             } finally {
                 Files.deleteIfExists(zipPath);
             }
-
             currentStep++;
-            System.out.println("[ResidueAI] Backend ready");
+            System.out.println("[ResidueAI] TTS backend ready");
         }
 
-        if (needModel) {
+        // 2. Tokenizer
+        if (needTokenizer) {
             checkCancelled();
-            System.out.println("[ResidueAI] Downloading model: " + model.displayName +
-                    " (~" + model.sizeMB + " MB)");
-            downloadFile(modelUrl, resolvedModelPath, currentStep, totalSteps);
-            System.out.println("[ResidueAI] Model downloaded: " + resolvedModelPath.getFileName());
-        } else if (model == LLMModel.CUSTOM) {
-            System.out.println("[ResidueAI] Custom model: place file at " + resolvedModelPath);
+            System.out.println("[ResidueAI] Downloading TTS tokenizer: " + tokenizer.displayName +
+                    " (~" + tokenizer.sizeMB + " MB)");
+            downloadFile(tokenizerUrl, resolvedTokenizerPath, currentStep, totalSteps);
+            currentStep++;
+            System.out.println("[ResidueAI] Tokenizer downloaded");
+        }
+
+        // 3. Talker
+        if (needTalker) {
+            checkCancelled();
+            System.out.println("[ResidueAI] Downloading TTS talker: " + talker.displayName +
+                    " (~" + talker.sizeMB + " MB)");
+            downloadFile(talkerUrl, resolvedTalkerPath, currentStep, totalSteps);
+            System.out.println("[ResidueAI] Talker downloaded");
         }
 
         if (statusLabel != null) statusLabel.setState(DownloadStatusLabel.State.DONE);
-        System.out.println("[ResidueAI] Setup complete");
+        System.out.println("[ResidueAI] TTS setup complete");
     }
 
     public void startServer() throws Exception {
         if (isRunning()) {
-            System.out.println("[ResidueAI] Server is already running");
+            System.out.println("[ResidueAI] TTS server is already running");
             return;
         }
 
-        LLMModel model = ResidueConfig.INSTANCE.llmModel;
-        Path resolvedModelPath;
-
-        if (model == LLMModel.CUSTOM) {
-            String customName = ResidueConfig.INSTANCE.customModelName;
-            if (customName == null || customName.isBlank())
-                throw new RuntimeException("Custom model: please specify filename in settings.");
-            resolvedModelPath = modelsDir.resolve(customName);
+        // Tokenizer path
+        TTSTokenizer tokenizer = ResidueConfig.INSTANCE.ttsTokenizer;
+        Path resolvedTokenizerPath;
+        if (tokenizer == TTSTokenizer.CUSTOM) {
+            resolvedTokenizerPath = modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTokenizerName);
         } else {
-            resolvedModelPath = modelsDir.resolve(model.fileName);
+            resolvedTokenizerPath = modelsDir.resolve(tokenizer.fileName);
         }
 
-        Path exePath = serverDir.resolve("llama-server.exe");
+        // Talker path
+        TTSTalker talker = ResidueConfig.INSTANCE.ttsTalker;
+        Path resolvedTalkerPath;
+        if (talker == TTSTalker.CUSTOM) {
+            resolvedTalkerPath = modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTalkerName);
+        } else {
+            resolvedTalkerPath = modelsDir.resolve(talker.fileName);
+        }
+
+        Path exePath = ttsDir.resolve("tts-server.exe");
 
         if (!Files.exists(exePath))
-            throw new RuntimeException("llama-server.exe not found. Please download the backend first via settings menu.");
-        if (!Files.exists(resolvedModelPath))
-            throw new RuntimeException("Model file not found: " + resolvedModelPath.toAbsolutePath());
+            throw new RuntimeException("tts-server.exe not found. Please download TTS backend first.");
+        if (!Files.exists(resolvedTokenizerPath))
+            throw new RuntimeException("Tokenizer file not found: " + resolvedTokenizerPath.toAbsolutePath());
+        if (!Files.exists(resolvedTalkerPath))
+            throw new RuntimeException("Talker file not found: " + resolvedTalkerPath.toAbsolutePath());
 
         LLMBackend backend = ResidueConfig.INSTANCE.llmBackend;
         if (backend == LLMBackend.AUTO) backend = detectBestBackend();
 
         ProcessBuilder pb = new ProcessBuilder();
-        pb.directory(serverDir.toFile());
+        pb.directory(ttsDir.toFile());
         pb.command(
                 exePath.toAbsolutePath().toString(),
-                "-m", resolvedModelPath.toAbsolutePath().toString(),
-                "--port", "8080",
-                "--ctx-size", String.valueOf(model.contextSize()),
+                "--model", resolvedTokenizerPath.toAbsolutePath().toString(),
+                "--talker", resolvedTalkerPath.toAbsolutePath().toString(),
+                "--port", "8081",
                 "--threads", String.valueOf(Runtime.getRuntime().availableProcessors())
         );
 
@@ -179,21 +206,21 @@ public class LLMServerManager {
             pb.command().add("99");
         }
 
-        System.out.println("[ResidueAI] Starting: " + String.join(" ", pb.command()));
+        System.out.println("[ResidueAI] Starting TTS: " + String.join(" ", pb.command()));
         serverProcess = pb.start();
         isRunning = true;
 
-        startLogReader(serverProcess.getInputStream(), "[LLAMA]", false);
-        startLogReader(serverProcess.getErrorStream(), "[LLAMA-ERR]", true);
+        startLogReader(serverProcess.getInputStream(), "[QWEN-TTS]", false);
+        startLogReader(serverProcess.getErrorStream(), "[QWEN-TTS-ERR]", true);
 
         waitForServer(60_000);
-        System.out.println("[ResidueAI] Server is ready on port 8080");
+        System.out.println("[ResidueAI] TTS server is ready on port 8081");
     }
 
     public void stopServer() {
         if (serverProcess != null && serverProcess.isAlive()) {
             serverProcess.destroy();
-            System.out.println("[ResidueAI] Server stopped");
+            System.out.println("[ResidueAI] TTS server stopped");
         }
         isRunning = false;
         serverProcess = null;
@@ -223,7 +250,7 @@ public class LLMServerManager {
             } catch (IOException e) {
                 if (attempt == maxRetries) throw e;
 
-                System.out.printf("[ResidueAI] Attempt %d/%d failed. Retrying in %d seconds...%n",
+                System.out.printf("[ResidueAI] TTS download attempt %d/%d failed. Retrying in %d seconds...%n",
                         attempt, maxRetries, retryDelayMs / 1000);
 
                 Thread.sleep(retryDelayMs);
@@ -240,7 +267,7 @@ public class LLMServerManager {
                     ? fileUrl
                     : fileUrl.replace("https://huggingface.co", mirrorBase);
 
-            System.out.println("[ResidueAI] Attempting download from: " + currentUrl);
+            System.out.println("[ResidueAI] Attempting TTS download from: " + currentUrl);
 
             URL url = new URL(currentUrl);
             int redirects = 0;
@@ -306,10 +333,10 @@ public class LLMServerManager {
                     long actualSize = Files.size(destination);
                     if (actualSize == 0) {
                         Files.deleteIfExists(destination);
-                        throw new IOException("Downloaded file is empty");
+                        throw new IOException("Downloaded TTS file is empty");
                     }
 
-                    System.out.println("[ResidueAI] Successfully downloaded: " + destination.getFileName() +
+                    System.out.println("[ResidueAI] Successfully downloaded TTS: " + destination.getFileName() +
                             " (" + (actualSize / (1024 * 1024)) + " MB)");
                     return;
 
@@ -323,7 +350,7 @@ public class LLMServerManager {
                 }
             }
         }
-        throw new IOException("Failed to download file from all sources");
+        throw new IOException("Failed to download TTS file from all sources");
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {
@@ -354,24 +381,26 @@ public class LLMServerManager {
         } catch (Exception ignored) { return ""; }
     }
 
-    private void extractZip(Path zipPath, Path destDir) throws Exception {
+    // Распаковка ZIP в корень (игнорируем пути внутри архива)
+    private void extractZipFlat(Path zipPath, Path destDir) throws Exception {
         try (ZipInputStream zis = new ZipInputStream(
                 new BufferedInputStream(new FileInputStream(zipPath.toFile())))) {
             ZipEntry entry;
             byte[] buffer = new byte[65536];
             while ((entry = zis.getNextEntry()) != null) {
                 checkCancelled();
-                Path filePath = destDir.resolve(entry.getName()).normalize();
+                String fileName = Paths.get(entry.getName()).getFileName().toString();
+                if (fileName.isEmpty() || entry.isDirectory()) {
+                    zis.closeEntry();
+                    continue;
+                }
+                Path filePath = destDir.resolve(fileName).normalize();
                 if (!filePath.startsWith(destDir.normalize()))
                     throw new SecurityException("Zip-slip attempt: " + entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(filePath);
-                } else {
-                    Files.createDirectories(filePath.getParent());
-                    try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) fos.write(buffer, 0, len);
-                    }
+
+                try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) fos.write(buffer, 0, len);
                 }
                 zis.closeEntry();
             }
@@ -384,11 +413,11 @@ public class LLMServerManager {
 
         while (System.currentTimeMillis() < deadline) {
             if (!isRunning()) {
-                throw new RuntimeException("llama-server exited immediately after start.");
+                throw new RuntimeException("tts-server exited immediately after start.");
             }
 
             try {
-                URL healthUrl = new URL("http://localhost:8080/health");
+                URL healthUrl = new URL("http://localhost:8081/health");
                 HttpURLConnection c = (HttpURLConnection) healthUrl.openConnection();
                 c.setConnectTimeout(2000);
                 c.setReadTimeout(2000);
@@ -404,10 +433,10 @@ public class LLMServerManager {
             attempt++;
 
             if (attempt % 10 == 0) {
-                System.out.println("[ResidueAI] Still waiting for server... (" + attempt + "s)");
+                System.out.println("[ResidueAI] Still waiting for TTS server... (" + attempt + "s)");
             }
         }
-        throw new RuntimeException("Server did not respond within " + (timeoutMs / 1000) + " seconds.");
+        throw new RuntimeException("TTS server did not respond within " + (timeoutMs / 1000) + " seconds.");
     }
 
     private void startLogReader(InputStream stream, String prefix, boolean isError) {
@@ -419,16 +448,16 @@ public class LLMServerManager {
                     else System.out.println(prefix + " " + line);
                 }
             } catch (IOException e) {
-                if (isRunning()) System.err.println("[ResidueAI] Log reader error: " + e.getMessage());
+                if (isRunning()) System.err.println("[ResidueAI] TTS log reader error: " + e.getMessage());
             }
-        }, "LLM-" + prefix);
+        }, "TTS-" + prefix);
         t.setDaemon(true);
         t.start();
     }
 
     private void checkCancelled() throws InterruptedException {
         if (downloadCancelled.get() || Thread.currentThread().isInterrupted())
-            throw new InterruptedException("Download cancelled");
+            throw new InterruptedException("TTS download cancelled");
     }
 
     private LLMBackend detectBestBackend() {

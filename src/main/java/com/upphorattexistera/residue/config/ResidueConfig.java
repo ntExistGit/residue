@@ -1,54 +1,55 @@
 package com.upphorattexistera.residue.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ResidueConfig {
-
     public static final ResidueConfig INSTANCE = new ResidueConfig();
 
     // General
-
     public boolean enableMod = true;
     public boolean debugMode = false;
+    public Language language = Language.ENGLISH;
 
+    // LLM
     public boolean llmEnable = true;
     public LLMBackend llmBackend = LLMBackend.AUTO;
     public LLMModel llmModel = LLMModel.QWEN_3B;
     public String customModelName = "";
-    public LLMLanguage llmLang = LLMLanguage.ENGLISH;
     public boolean llmThink = false;
     public String huggingFaceToken = "";
     public int maxHistorySize = 40;
+
+    // TTS
+    public boolean ttsEnable = false;
+    public TTSTokenizer ttsTokenizer = TTSTokenizer.Q4_K_M;
+    public TTSTalker ttsTalker = TTSTalker.QWEN_TALKER_1_7B_CUSTOM_Q4;
+    public String ttsCustomTokenizerName = "";
+    public String ttsCustomTalkerName = "";
+    public String ttsDefaultSpeaker = "alloy";
 
     // Twitch
     public boolean enableTwitchIntegration = false;
     public String twitchChannel = "";
 
     // Memory
-
     public int memoryIncreaseSeconds = 60;
     public int maxMemory = 1000;
 
     // Observer
-
     public boolean observerSystemEnabled = true;
     public int observerJoinMinMinutes = 10;
     public int observerJoinMaxMinutes = 40;
 
     // Events
-
     public boolean enableDreamEvent = true;
     public boolean enableDistantTorchEvent = true;
     public boolean enableSelfCloneEvent = true;
 
     // Voice Chat
-
     public boolean enableVoiceChatIntegration = true;
     public double voiceAttentionMultiplier = 1.0D;
 
     // Fake LAN
-
     public boolean enableFakeLanEvent = true;
     public int fakeLanMinMinutes = 5;
     public int fakeLanMaxMinutes = 20;
@@ -114,4 +115,13 @@ public class ResidueConfig {
 
     public float observerRaycastAngleDegrees = 120.0f;
     public List<String> observerRaycastIgnoreBlocks = RaycastIgnore.getAllRawIds();
+
+    // Observer Work
+    public boolean enableObserverWork = true;
+    public int observerWorkRadius = 16;
+    public int observerWorkDurationTicks = 100;
+    public int observerWorkMaxBlocksPerSession = 3;
+    public double observerWorkChancePerSecond = 0.05;
+    public boolean observerWorkDropItems = true;
+    public boolean observerCanPickUpLoot = true;
 }

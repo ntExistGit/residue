@@ -1,6 +1,7 @@
 package com.upphorattexistera.residue.entity;
 
 import com.upphorattexistera.residue.config.ResidueConfig;
+import com.upphorattexistera.residue.entity.ai.ObserverWorkGoal;
 import com.upphorattexistera.residue.memory.MemoryStage;
 import com.upphorattexistera.residue.observer.ObserverEntitySpawner;
 import com.upphorattexistera.residue.observer.ObserverRaycastIgnoreResolver;
@@ -61,14 +62,10 @@ public class ObserverEntity extends PathAwareEntity {
     public ObserverEntity(EntityType<? extends PathAwareEntity> type, World world) {
         super(type, world);
         this.setInvulnerable(true);
-
-        // Звуки шагов и т.п. должны быть слышны — игрок должен чувствовать
-        // присутствие рядом, даже когда не видит обсервера.
         this.setSilent(false);
-
         this.getNavigation().setCanOpenDoors(true);
         this.getNavigation().setCanSwim(true);
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(ResidueConfig.INSTANCE.observerCanPickUpLoot);
     }
 
     @Override
@@ -89,8 +86,9 @@ public class ObserverEntity extends PathAwareEntity {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new LookAtEntityGoal(this, PlayerEntity.class, 32.0F));
-        this.goalSelector.add(3, new WanderAroundFarGoal(this, 1.0F, 1.0F));
-        this.goalSelector.add(4, new LookAroundGoal(this));
+        this.goalSelector.add(3, new ObserverWorkGoal(this));
+        this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0F, 1.0F));
+        this.goalSelector.add(5, new LookAroundGoal(this));
     }
 
     @Override
@@ -239,17 +237,29 @@ public class ObserverEntity extends PathAwareEntity {
         // Навигация восстанавливается сама через обычные Goal'ы на следующем тике.
     }
 
+    public boolean isWatching() {
+        return isWatching;
+    }
+
+    public boolean isPlayerNearby() {
+        ServerPlayerEntity player = findNearestPlayer();
+        if (player == null) return false;
+
+        ObserverStageConfig stageConfig = ObserverStageConfig.forStage(MemoryStage.getCurrentStage());
+        if (!stageConfig.watchEnabled()) return false;
+
+        double distance = this.getEntityPos().distanceTo(player.getEntityPos());
+        return distance <= stageConfig.watchDistance();
+    }
+
     private void teleportAway(ServerPlayerEntity player) {
         if (!(this.getEntityWorld() instanceof ServerWorld serverWorld)) return;
 
-        boolean success = ObserverEntitySpawner.teleportObserver(
-                serverWorld, this, player.getBlockPos());
+        boolean success = ObserverEntitySpawner.teleportObserver(serverWorld, this, player);
 
         if (success) {
             exitWatchState();
         }
-        // Если подходящую точку не нашли — остаёмся на месте, попробуем
-        // снова через DISTANCE_CHECK_INTERVAL тиков.
     }
 
     private ServerPlayerEntity findNearestPlayer() {

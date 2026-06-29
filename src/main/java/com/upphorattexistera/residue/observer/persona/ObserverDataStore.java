@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ObserverDataStore {
@@ -39,19 +40,21 @@ public class ObserverDataStore {
     // Public API
     // ----------------------------------------------------------------
 
-    /**
-     * Возвращает привязку для обсервера.
-     * Если её нет — создаёт новую с рандомной персоной.
-     */
+    private static final Random RANDOM = new Random();
+
     public static ObserverAssignment getOrCreate(String observerName, String skinFile) {
         return assignments.computeIfAbsent(observerName, name -> {
             ObserverPersona persona = ObserverPersonaLoader.getRandom();
             int personaId = persona != null ? persona.id : 0;
+            ObserverGender gender = ObserverGender.random(RANDOM);
 
-            Residue.LOGGER.info("[Residue] New observer assignment: {} → persona={}",
-                    name, personaId);
+            ObserverAssignment assignment = new ObserverAssignment(name, personaId, skinFile, 0);
+            assignment.gender = gender.filePrefix;
 
-            return new ObserverAssignment(name, personaId, skinFile, 0);
+            Residue.LOGGER.info("[Residue] New observer assignment: {} → persona={} gender={}",
+                    name, personaId, gender.filePrefix);
+
+            return assignment;
         });
     }
 
@@ -109,6 +112,7 @@ public class ObserverDataStore {
                 JsonObject obj = new JsonObject();
                 obj.addProperty("name", a.name);
                 obj.addProperty("persona_id", a.personaId);
+                obj.addProperty("gender", a.gender);
                 obj.addProperty("skin_file", a.skinFile);
                 obj.addProperty("skin_stage", a.skinStage);
                 obj.add("conversation_history", a.conversationHistory);
@@ -121,11 +125,11 @@ public class ObserverDataStore {
                     new GsonBuilder().setPrettyPrinting().create().toJson(root),
                     StandardCharsets.UTF_8);
 
-            Residue.LOGGER.debug("[Residue] ObserverDataStore saved ({} entries)",
+            Residue.LOGGER.debug("[residue] ObserverDataStore saved ({} entries)",
                     assignments.size());
 
         } catch (Exception e) {
-            Residue.LOGGER.warn("[Residue] Failed to save observer_data.json: {}",
+            Residue.LOGGER.warn("[residue] Failed to save observer_data.json: {}",
                     e.getMessage());
         }
     }
@@ -144,9 +148,12 @@ public class ObserverDataStore {
                 int personaId = obj.get("persona_id").getAsInt();
                 String skinFile = obj.get("skin_file").getAsString();
                 int skinStage = obj.get("skin_stage").getAsInt();
+                String gender = obj.has("gender")
+                        ? obj.get("gender").getAsString()
+                        : ObserverGender.random(RANDOM).filePrefix;
 
-                ObserverAssignment assignment = new ObserverAssignment(
-                        name, personaId, skinFile, skinStage);
+                ObserverAssignment assignment = new ObserverAssignment(name, personaId, skinFile, skinStage);
+                assignment.gender = gender;
 
                 if (obj.has("conversation_history")) {
                     assignment.conversationHistory =
@@ -154,15 +161,15 @@ public class ObserverDataStore {
                 }
 
                 assignments.put(name, assignment);
-                Residue.LOGGER.debug("[Residue] Loaded observer: {} persona={}",
+                Residue.LOGGER.debug("[residue] Loaded observer: {} persona={}",
                         name, personaId);
             }
 
-            Residue.LOGGER.info("[Residue] ObserverDataStore loaded ({} observers)",
+            Residue.LOGGER.info("[residue] ObserverDataStore loaded ({} observers)",
                     assignments.size());
 
         } catch (Exception e) {
-            Residue.LOGGER.warn("[Residue] Failed to load observer_data.json: {}",
+            Residue.LOGGER.warn("[residue] Failed to load observer_data.json: {}",
                     e.getMessage());
         }
     }

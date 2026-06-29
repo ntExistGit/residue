@@ -31,6 +31,6 @@ public class Residue implements ModInitializer {
         // 6. Регистрация команд
         CommandInitializer.init();
 
-        LOGGER.info("[Residue] initialized successfully");
+        LOGGER.info("[residue] initialized successfully");
     }
 }

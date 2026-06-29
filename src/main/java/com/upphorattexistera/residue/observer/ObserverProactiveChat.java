@@ -1,9 +1,10 @@
 package com.upphorattexistera.residue.observer;
 
 import com.upphorattexistera.residue.WorldState;
-import com.upphorattexistera.residue.config.LLMLanguage;
+import com.upphorattexistera.residue.config.Language;
 import com.upphorattexistera.residue.config.ResidueConfig;
 import com.upphorattexistera.residue.memory.MemoryManager;
+import com.upphorattexistera.residue.memory.MemoryStage;
 import com.upphorattexistera.residue.network.ObserverMessagePacket;
 import com.upphorattexistera.residue.observer.context.ObserverContextRegistry;
 import com.upphorattexistera.residue.observer.persona.*;
@@ -35,7 +36,7 @@ public class ObserverProactiveChat {
 
         int memory = MemoryManager.getMemory();
         int max    = ResidueConfig.INSTANCE.maxMemory;
-        int stage  = getStage(memory, max);
+        int stage  = MemoryStage.getStage(memory, max);
 
         ServerPlayerEntity player = server.getPlayerManager()
                 .getPlayerList().stream().findFirst().orElse(null);
@@ -72,10 +73,12 @@ public class ObserverProactiveChat {
                 String rawContext  = type.getContext(contextKey);
                 String context     = ObserverContextRegistry.inject(rawContext, player);
 
-                LLMLanguage currentLang = ResidueConfig.INSTANCE.llmLang;
+                Language currentLang = ResidueConfig.INSTANCE.llmLang;
 
-                String prompt      = persona.buildPrompt(observerName, stage,
-                        player.getName().getString(), currentLang);
+                ObserverGender gender = ObserverGender.byId(assignment.gender);
+
+                String prompt = persona.buildPrompt(observerName, stage,
+                        player.getName().getString(), currentLang, gender);
                 String historyJson = ObserverDataStore.getHistory(observerName).toString();
 
                 long nextCooldown = type.getRandomCooldownTicks(RANDOM);
@@ -112,14 +115,6 @@ public class ObserverProactiveChat {
         if (isNight) return "night";
         if (typeId.equals("inventory") && emptyInventory) return "empty";
         return "default";
-    }
-
-    private static int getStage(int memory, int max) {
-        if (memory < max * 0.20) return 0;
-        if (memory < max * 0.40) return 1;
-        if (memory < max * 0.60) return 2;
-        if (memory < max * 0.80) return 3;
-        return 4;
     }
 
     public static void reset() {

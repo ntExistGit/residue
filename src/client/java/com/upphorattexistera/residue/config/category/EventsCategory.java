@@ -50,7 +50,7 @@ public final class EventsCategory {
 
                 // --- Fake LAN ---
 
-                .option(LabelOption.create(Text.translatable("residue.config.label.fake_lan")))
+                .option(LabelOption.create(Text.translatable("residue.config.fake_lan.label")))
 
                 .option(Option.<Boolean>createBuilder()
                         .name(Text.translatable("residue.config.fake_lan"))
@@ -282,6 +282,87 @@ public final class EventsCategory {
                                 value -> ResidueConfig.INSTANCE.selfCloneCooldownSeconds = value)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                                 .range(30, 3600).step(30))
+                        .build())
+
+                // --- Observer Work ---
+
+                .option(LabelOption.create(Text.translatable("residue.config.observer_work.label")))
+
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.enable"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.enable.desc")))
+                        .binding(true,
+                                () -> ResidueConfig.INSTANCE.enableObserverWork,
+                                value -> ResidueConfig.INSTANCE.enableObserverWork = value)
+                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                .trueFalseFormatter().coloured(true))
+                        .build())
+
+                .option(Option.<Integer>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.radius"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.radius.desc")))
+                        .binding(16,
+                                () -> ResidueConfig.INSTANCE.observerWorkRadius,
+                                value -> ResidueConfig.INSTANCE.observerWorkRadius = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                .range(4, 32).step(1))
+                        .build())
+
+                .option(Option.<Integer>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.duration"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.duration.desc")))
+                        .binding(100,
+                                () -> ResidueConfig.INSTANCE.observerWorkDurationTicks,
+                                value -> ResidueConfig.INSTANCE.observerWorkDurationTicks = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                .range(20, 400).step(10))
+                        .build())
+
+                .option(Option.<Integer>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.max_blocks"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.max_blocks.desc")))
+                        .binding(3,
+                                () -> ResidueConfig.INSTANCE.observerWorkMaxBlocksPerSession,
+                                value -> ResidueConfig.INSTANCE.observerWorkMaxBlocksPerSession = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                .range(1, 20).step(1))
+                        .build())
+
+                .option(Option.<Double>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.chance"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.chance.desc")))
+                        .binding(0.05,
+                                () -> ResidueConfig.INSTANCE.observerWorkChancePerSecond,
+                                value -> ResidueConfig.INSTANCE.observerWorkChancePerSecond = value)
+                        .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                                .range(0.0, 1.0).step(0.01))
+                        .build())
+
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.break_block"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.break_block.desc")))
+                        .binding(true,
+                                () -> ResidueConfig.INSTANCE.observerWorkDropItems,
+                                value -> ResidueConfig.INSTANCE.observerWorkDropItems = value)
+                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                .trueFalseFormatter().coloured(true))
+                        .build())
+
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable("residue.config.observer_work.can_pick_up_loot"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.observer_work.can_pick_up_loot.desc")))
+                        .binding(true,
+                                () -> ResidueConfig.INSTANCE.observerCanPickUpLoot,
+                                value -> ResidueConfig.INSTANCE.observerCanPickUpLoot = value)
+                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                .trueFalseFormatter().coloured(true))
                         .build())
 
                 .build();

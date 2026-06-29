@@ -40,12 +40,12 @@ public class ResidueClientEvents {
     private static void debugTabList() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.getNetworkHandler() == null) {
-            System.out.println("[Residue] NetworkHandler is null");
+            System.out.println("[residue] NetworkHandler is null");
             return;
         }
 
         client.getNetworkHandler().getPlayerList().forEach(entry ->
-                System.out.println("[Residue] Tab entry: " + entry.getProfile().name())
+                System.out.println("[residue] Tab entry: " + entry.getProfile().name())
         );
     }
 

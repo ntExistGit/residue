@@ -29,7 +29,7 @@ public class ObserverTypeLoader {
             InputStream stream;
             if (Files.exists(external)) {
                 stream = Files.newInputStream(external);
-                Residue.LOGGER.info("[Residue] Loaded observer_types.json from config");
+                Residue.LOGGER.info("[residue] Loaded observer_types.json from config");
             } else {
                 Optional<ModContainer> mod = FabricLoader.getInstance()
                         .getModContainer("residue");
@@ -38,11 +38,11 @@ public class ObserverTypeLoader {
                 Optional<Path> path = mod.get()
                         .findPath("assets/residue/observer_types.json");
                 if (path.isEmpty()) {
-                    Residue.LOGGER.warn("[Residue] observer_types.json not found in assets");
+                    Residue.LOGGER.warn("[residue] observer_types.json not found in assets");
                     return;
                 }
                 stream = Files.newInputStream(path.get());
-                Residue.LOGGER.info("[Residue] Loaded observer_types.json from assets");
+                Residue.LOGGER.info("[residue] Loaded observer_types.json from assets");
             }
 
             JsonObject root = JsonParser.parseReader(
@@ -73,13 +73,13 @@ public class ObserverTypeLoader {
                 types.put(id, new ObserverType(id, cooldownMin, cooldownMax,
                         chancePerStage, contexts));
 
-                Residue.LOGGER.debug("[Residue] Loaded observer type: {}", id);
+                Residue.LOGGER.debug("[residue] Loaded observer type: {}", id);
             }
 
-            Residue.LOGGER.info("[Residue] Loaded {} observer types", types.size());
+            Residue.LOGGER.info("[residue] Loaded {} observer types", types.size());
 
         } catch (Exception e) {
-            Residue.LOGGER.error("[Residue] Failed to load observer_types.json: {}",
+            Residue.LOGGER.error("[residue] Failed to load observer_types.json: {}",
                     e.getMessage());
         }
     }

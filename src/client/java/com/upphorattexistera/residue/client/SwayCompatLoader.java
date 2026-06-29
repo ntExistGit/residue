@@ -45,16 +45,16 @@ public class SwayCompatLoader {
 
                             if (block != Blocks.AIR) {
                                 SwayAPI.register(block, multiplier);
-                                // System.out.println("[Residue] Sway integration: registered " + id);
+                                // System.out.println("[residue] Sway integration: registered " + id);
                             }
                         }
                     }
                 } catch (Exception e) {
-                    System.err.println("[Residue] Failed to load sway_compat.json!");
+                    System.err.println("[residue] Failed to load sway_compat.json!");
                     e.printStackTrace();
                 }
             } else {
-                System.err.println("[Residue] Could not find sway_compat.json in resources!");
+                System.err.println("[residue] Could not find sway_compat.json in resources!");
             }
         }
     }

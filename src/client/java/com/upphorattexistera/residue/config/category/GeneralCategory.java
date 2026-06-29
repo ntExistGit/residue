@@ -38,9 +38,9 @@ public final class GeneralCategory {
                         .build())
 
                 .option(Option.<Boolean>createBuilder()
-                        .name(Text.translatable(""))
+                        .name(Text.translatable("residue.config.twitch_enable"))
                         .description(OptionDescription.of(
-                                Text.translatable("")))
+                                Text.translatable("residue.config.twitch_enable.desc")))
                         .binding(true,
                                 () -> ResidueConfig.INSTANCE.enableTwitchIntegration,
                                 value -> ResidueConfig.INSTANCE.enableTwitchIntegration = value)
@@ -48,9 +48,9 @@ public final class GeneralCategory {
                         .build())
 
                 .option(Option.<String>createBuilder()
-                        .name(Text.translatable(""))
+                        .name(Text.translatable("residue.config.twitch_channel"))
                         .description(OptionDescription.of(
-                                Text.translatable("")))
+                                Text.translatable("residue.config.twitch_channel.desc")))
                         .binding("",
                                 () -> ResidueConfig.INSTANCE.twitchChannel,
                                 value -> ResidueConfig.INSTANCE.twitchChannel = value)
@@ -58,9 +58,9 @@ public final class GeneralCategory {
                         .build())
 
                 .option(Option.<Boolean>createBuilder()
-                        .name(Text.translatable(""))
+                        .name(Text.translatable("residue.config.voicechat_enable"))
                         .description(OptionDescription.of(
-                                Text.translatable("")))
+                                Text.translatable("residue.config.voicechat_enable.desc")))
                         .binding(true,
                                 () -> ResidueConfig.INSTANCE.enableVoiceChatIntegration,
                                 value -> ResidueConfig.INSTANCE.enableVoiceChatIntegration = value)
@@ -68,9 +68,9 @@ public final class GeneralCategory {
                         .build())
 
                 .option(Option.<Double>createBuilder()
-                        .name(Text.translatable(""))
+                        .name(Text.translatable("residue.config.voice_attention_multiplier"))
                         .description(OptionDescription.of(
-                                Text.translatable("")))
+                                Text.translatable("residue.config.voice_attention_multiplier.desc")))
                         .binding(1.0,
                                 () -> ResidueConfig.INSTANCE.voiceAttentionMultiplier,
                                 value -> ResidueConfig.INSTANCE.voiceAttentionMultiplier = value)

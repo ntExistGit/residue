@@ -33,6 +33,6 @@ public class FakeLanPacket {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ServerPlayNetworking.send(player, new Payload());
         }
-        Residue.LOGGER.info("[Residue] FakeLan event triggered");
+        Residue.LOGGER.info("[residue] FakeLan event triggered");
     }
 }

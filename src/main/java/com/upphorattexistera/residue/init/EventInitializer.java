@@ -5,6 +5,7 @@ import com.upphorattexistera.residue.ResidueTickHandler;
 import com.upphorattexistera.residue.event.events.FakeLanEvent;
 import com.upphorattexistera.residue.memory.MemoryManager;
 import com.upphorattexistera.residue.observer.*;
+import com.upphorattexistera.residue.observer.context.provider.PlayerStateContextProvider;
 import com.upphorattexistera.residue.observer.persona.ObserverDataStore;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -43,5 +44,6 @@ public class EventInitializer {
         ObserverSkinResolver.clearCache();
         ObserverEntitySpawner.clearAll();
         ObserverProactiveChat.reset();
+        PlayerStateContextProvider.reset();
     }
 }

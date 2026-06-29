@@ -70,6 +70,6 @@ public class ObserverListPacket {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ServerPlayNetworking.send(player, payload);
         }
-        Residue.LOGGER.debug("[Residue] ObserverList sent: {} observers", observers.size());
+        Residue.LOGGER.debug("[residue] ObserverList sent: {} observers", observers.size());
     }
 }
