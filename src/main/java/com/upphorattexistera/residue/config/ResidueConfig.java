@@ -21,11 +21,13 @@ public class ResidueConfig {
 
     // TTS
     public boolean ttsEnable = false;
+    public double ttsAudibleDistance = 32.0;
+    public int ttsPreRollMs = 300;
     public TTSTokenizer ttsTokenizer = TTSTokenizer.Q4_K_M;
     public TTSTalker ttsTalker = TTSTalker.QWEN_TALKER_1_7B_CUSTOM_Q4;
     public String ttsCustomTokenizerName = "";
     public String ttsCustomTalkerName = "";
-    public String ttsDefaultSpeaker = "alloy";
+    public List<String> ttsEnabledSpeakers = new java.util.ArrayList<>(TTSSpeakers.ALL);
 
     // Twitch
     public boolean enableTwitchIntegration = false;

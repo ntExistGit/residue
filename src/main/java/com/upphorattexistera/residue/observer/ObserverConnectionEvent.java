@@ -5,6 +5,7 @@ import com.upphorattexistera.residue.WorldState;
 import com.upphorattexistera.residue.config.ResidueConfig;
 import com.upphorattexistera.residue.event.events.FakeLanEvent;
 import com.upphorattexistera.residue.network.ObserverListPacket;
+import com.upphorattexistera.residue.observer.persona.ObserverAssignment;
 import com.upphorattexistera.residue.observer.persona.ObserverDataStore;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -226,6 +227,11 @@ public class ObserverConnectionEvent {
             SkinData skinData = ObserverSkinResolver.getCached(session.observer.getName());
             String skinTextureId = null;
             boolean slim = false;
+            String ttsSpeaker = "";
+            ObserverAssignment assignment = ObserverDataStore.get(session.observer.getName());
+            if (assignment != null && assignment.ttsSpeaker != null) {
+                ttsSpeaker = assignment.ttsSpeaker;
+            }
 
             if (skinData.hasTextures()) {
                 skinTextureId = skinData.getTexturesProperty().value();
@@ -233,7 +239,7 @@ public class ObserverConnectionEvent {
             }
 
             entries.add(new ObserverListPacket.ObserverEntry(
-                    uuid, session.observer.getName(), latency, skinTextureId, slim));
+                    uuid, session.observer.getName(), latency, skinTextureId, slim, ttsSpeaker));
         }
 
         ObserverListPacket.sendToAll(server, entries);

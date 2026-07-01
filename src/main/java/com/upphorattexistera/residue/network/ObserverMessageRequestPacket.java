@@ -68,7 +68,7 @@ public class ObserverMessageRequestPacket {
 
             int stage  = MemoryStage.getStage(MemoryManager.getMemory(), ResidueConfig.INSTANCE.maxMemory);
 
-            Language currentLang = ResidueConfig.INSTANCE.llmLang;
+            Language currentLang = ResidueConfig.INSTANCE.language;
 
             ObserverGender gender = ObserverGender.byId(assignment.gender);
 

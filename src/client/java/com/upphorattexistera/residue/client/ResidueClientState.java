@@ -6,6 +6,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class ResidueClientState {
 
     private static final Map<UUID, Identifier> skinTextures = new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> skinSlimMap = new ConcurrentHashMap<>();
+    private static final Map<UUID, String> speakerMap = new ConcurrentHashMap<>();
 
     // ----------------------------------------------------------------
     // Обновление списка обсерверов
@@ -33,6 +35,7 @@ public class ResidueClientState {
 
         for (ObserverListPacket.ObserverEntry entry : newList) {
             skinSlimMap.put(entry.uuid(), entry.slim());
+            speakerMap.put(entry.uuid(), entry.ttsSpeaker());
 
             if (entry.skinTextureId() != null && !skinTextures.containsKey(entry.uuid())) {
                 registerSkin(entry.uuid(), entry.name(), entry.skinTextureId());
@@ -113,9 +116,14 @@ public class ResidueClientState {
         return skinSlimMap.getOrDefault(uuid, false);
     }
 
+    public static String getObserverSpeaker(UUID uuid) {
+        return speakerMap.get(uuid);
+    }
+
     public static void clear() {
         observers.clear();
         skinTextures.clear();
         skinSlimMap.clear();
+        speakerMap.clear();
     }
 }

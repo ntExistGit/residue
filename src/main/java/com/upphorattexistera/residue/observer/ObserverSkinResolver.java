@@ -96,7 +96,7 @@ public class ObserverSkinResolver {
                         .filter(p -> matchesGender(p.getFileName().toString(), gender))
                         .toList();
 
-                if (genderSkins.isEmpty()) continue; // нет файлов этого пола — пробуем стейдж ниже
+                if (genderSkins.isEmpty()) continue;
 
                 return pickAndBuildSkin(name, assignment, genderSkins, s);
             }

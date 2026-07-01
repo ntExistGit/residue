@@ -193,6 +193,28 @@ public final class AI_CPP_Category {
                         .controller(BooleanControllerBuilder::create)
                         .build())
 
+                .option(Option.<Double>createBuilder()
+                        .name(Text.translatable("residue.config.tts_audible_distance"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.tts_audible_distance.desc")))
+                        .binding(32.0,
+                                () -> ResidueConfig.INSTANCE.ttsAudibleDistance,
+                                value -> ResidueConfig.INSTANCE.ttsAudibleDistance = value)
+                        .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                                .range(8.0, 128.0).step(4.0))
+                        .build())
+
+                .option(Option.<Integer>createBuilder()
+                        .name(Text.translatable("residue.config.tts_pre_roll"))
+                        .description(OptionDescription.of(
+                                Text.translatable("residue.config.tts_pre_roll.desc")))
+                        .binding(300,
+                                () -> ResidueConfig.INSTANCE.ttsPreRollMs,
+                                value -> ResidueConfig.INSTANCE.ttsPreRollMs = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                .range(0, 2000).step(50))
+                        .build())
+
                 .option(Option.<TTSTokenizer>createBuilder()
                         .name(Text.translatable("residue.config.tts_tokenizer"))
                         .description(OptionDescription.of(
@@ -243,14 +265,19 @@ public final class AI_CPP_Category {
                         .controller(StringControllerBuilder::create)
                         .build())
 
-                .option(Option.<String>createBuilder()
-                        .name(Text.translatable("residue.config.tts_default_speaker"))
+                .group(ListOption.<String>createBuilder()
+                        .name(Text.translatable("residue.config.tts_enabled_speakers"))
                         .description(OptionDescription.of(
-                                Text.translatable("residue.config.tts_default_speaker.desc")))
-                        .binding("alloy",
-                                () -> ResidueConfig.INSTANCE.ttsDefaultSpeaker,
-                                value -> ResidueConfig.INSTANCE.ttsDefaultSpeaker = value)
-                        .controller(StringControllerBuilder::create)
+                                Text.translatable("residue.config.tts_enabled_speakers.desc")))
+                        .binding(
+                                new java.util.ArrayList<>(TTSSpeakers.ALL),
+                                () -> ResidueConfig.INSTANCE.ttsEnabledSpeakers,
+                                value -> ResidueConfig.INSTANCE.ttsEnabledSpeakers = value)
+                        .controller(opt -> DropdownStringControllerBuilder.create(opt)
+                                .values(TTSSpeakers.ALL)
+                                .allowAnyValue(false)
+                                .allowEmptyValue(false))
+                        .initial(TTSSpeakers.ALL.get(0))
                         .build())
 
                 .option(ttsStatusLabel.getOption())

@@ -73,7 +73,7 @@ public class ObserverProactiveChat {
                 String rawContext  = type.getContext(contextKey);
                 String context     = ObserverContextRegistry.inject(rawContext, player);
 
-                Language currentLang = ResidueConfig.INSTANCE.llmLang;
+                Language currentLang = ResidueConfig.INSTANCE.language;
 
                 ObserverGender gender = ObserverGender.byId(assignment.gender);
 

@@ -7,6 +7,7 @@ public class ObserverAssignment {
     public final String name;
     public int personaId;
     public String gender;
+    public String ttsSpeaker;
     public String skinFile;
     public int skinStage;
     public JsonArray conversationHistory;

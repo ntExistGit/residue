@@ -1,12 +1,13 @@
 package com.upphorattexistera.residue.observer.persona;
 
+import java.util.List;
 import java.util.Random;
 
 /**
  * Пол обсервера, выбирается случайно один раз при первом подключении
  * (ObserverDataStore.getOrCreate) и сохраняется на весь срок жизни
  * привязки. Используется как для фильтрации скинов (префикс файла),
- * так и для системной инструкции LLM.
+ * для системной инструкции LLM, и для выбора пула TTS-голосов.
  */
 public enum ObserverGender {
 

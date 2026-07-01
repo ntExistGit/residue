@@ -60,11 +60,15 @@ public class ResidueConfigSerializer {
 
         // TTS
         cfg.ttsEnable = loaded.ttsEnable;
+        cfg.ttsAudibleDistance = loaded.ttsAudibleDistance > 0 ? loaded.ttsAudibleDistance : 32.0;
+        cfg.ttsPreRollMs = loaded.ttsPreRollMs >= 0 ? loaded.ttsPreRollMs : 300;
         cfg.ttsTokenizer = loaded.ttsTokenizer != null ? loaded.ttsTokenizer : TTSTokenizer.Q4_K_M;
         cfg.ttsTalker = loaded.ttsTalker != null ? loaded.ttsTalker : TTSTalker.QWEN_TALKER_1_7B_CUSTOM_Q4;
         cfg.ttsCustomTokenizerName = loaded.ttsCustomTokenizerName;
         cfg.ttsCustomTalkerName = loaded.ttsCustomTalkerName;
-        cfg.ttsDefaultSpeaker = loaded.ttsDefaultSpeaker;
+        cfg.ttsEnabledSpeakers = loaded.ttsEnabledSpeakers != null
+                ? loaded.ttsEnabledSpeakers
+                : new java.util.ArrayList<>(TTSSpeakers.ALL);
 
         // Memory
         cfg.memoryIncreaseSeconds = loaded.memoryIncreaseSeconds;

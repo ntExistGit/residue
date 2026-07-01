@@ -21,7 +21,8 @@ public class ObserverListPacket {
             new CustomPayload.Id<>(Identifier.of("residue", "observer_list"));
 
     public record ObserverEntry(UUID uuid, String name, int latency,
-                                @Nullable String skinTextureId, boolean slim) {}
+                                @Nullable String skinTextureId, boolean slim,
+                                String ttsSpeaker) {}
 
     public record Payload(List<ObserverEntry> observers) implements CustomPayload {
 
@@ -37,6 +38,7 @@ public class ObserverListPacket {
                                 buf.writeBoolean(hasSkin);
                                 if (hasSkin) buf.writeString(e.skinTextureId());
                                 buf.writeBoolean(e.slim());
+                                buf.writeString(e.ttsSpeaker() != null ? e.ttsSpeaker() : "");
                             }
                         },
                         buf -> {
@@ -49,7 +51,8 @@ public class ObserverListPacket {
                                 boolean hasSkin = buf.readBoolean();
                                 String skinId = hasSkin ? buf.readString() : null;
                                 boolean slim = buf.readBoolean();
-                                list.add(new ObserverEntry(uuid, name, latency, skinId, slim));
+                                String ttsSpeaker = buf.readString();
+                                list.add(new ObserverEntry(uuid, name, latency, skinId, slim, ttsSpeaker));
                             }
                             return new Payload(list);
                         }

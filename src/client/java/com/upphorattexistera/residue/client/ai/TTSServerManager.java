@@ -160,51 +160,41 @@ public class TTSServerManager {
             return;
         }
 
-        // Tokenizer path
         TTSTokenizer tokenizer = ResidueConfig.INSTANCE.ttsTokenizer;
-        Path resolvedTokenizerPath;
-        if (tokenizer == TTSTokenizer.CUSTOM) {
-            resolvedTokenizerPath = modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTokenizerName);
-        } else {
-            resolvedTokenizerPath = modelsDir.resolve(tokenizer.fileName);
-        }
+        Path resolvedTokenizerPath = (tokenizer == TTSTokenizer.CUSTOM)
+                ? modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTokenizerName)
+                : modelsDir.resolve(tokenizer.fileName);
 
-        // Talker path
         TTSTalker talker = ResidueConfig.INSTANCE.ttsTalker;
-        Path resolvedTalkerPath;
-        if (talker == TTSTalker.CUSTOM) {
-            resolvedTalkerPath = modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTalkerName);
-        } else {
-            resolvedTalkerPath = modelsDir.resolve(talker.fileName);
-        }
+        Path resolvedTalkerPath = (talker == TTSTalker.CUSTOM)
+                ? modelsDir.resolve(ResidueConfig.INSTANCE.ttsCustomTalkerName)
+                : modelsDir.resolve(talker.fileName);
 
         Path exePath = ttsDir.resolve("tts-server.exe");
 
         if (!Files.exists(exePath))
             throw new RuntimeException("tts-server.exe not found. Please download TTS backend first.");
-        if (!Files.exists(resolvedTokenizerPath))
-            throw new RuntimeException("Tokenizer file not found: " + resolvedTokenizerPath.toAbsolutePath());
         if (!Files.exists(resolvedTalkerPath))
             throw new RuntimeException("Talker file not found: " + resolvedTalkerPath.toAbsolutePath());
-
-        LLMBackend backend = ResidueConfig.INSTANCE.llmBackend;
-        if (backend == LLMBackend.AUTO) backend = detectBestBackend();
+        if (!Files.exists(resolvedTokenizerPath))
+            throw new RuntimeException("Tokenizer (codec) file not found: " + resolvedTokenizerPath.toAbsolutePath());
 
         ProcessBuilder pb = new ProcessBuilder();
         pb.directory(ttsDir.toFile());
         pb.command(
                 exePath.toAbsolutePath().toString(),
-                "--model", resolvedTokenizerPath.toAbsolutePath().toString(),
-                "--talker", resolvedTalkerPath.toAbsolutePath().toString(),
-                "--port", "8081",
-                "--threads", String.valueOf(Runtime.getRuntime().availableProcessors())
+                "--model", resolvedTalkerPath.toAbsolutePath().toString(),     // talker LM
+                "--codec", resolvedTokenizerPath.toAbsolutePath().toString(),  // 12Hz tokenizer/codec
+                "--host", "127.0.0.1",
+                "--port", "8081"
+                // --no-fa / --clamp-fp16 — не трогаем, дефолты ок (use_fa=true, clamp_fp16=false)
+                // --lang НЕ передаём: это фиксированный label сервера, не per-request;
+                // язык реплики управляется текстом промпта через ResidueConfig.language, а не этим флагом
         );
 
-        if (backend == LLMBackend.VULKAN || backend == LLMBackend.CUDA12 ||
-                backend == LLMBackend.CUDA13 || backend == LLMBackend.HIP) {
-            pb.command().add("--n-gpu-layers");
-            pb.command().add("99");
-        }
+        // GPU backend выбирается автоматически тем бэкендом ggml, что слинкован в exe
+        // (vulkan/cuda/cpu — определяется тем, какой архив скачан), флагов --n-gpu-layers
+        // и --threads у tts-server НЕТ — их здесь больше не передаём.
 
         System.out.println("[ResidueAI] Starting TTS: " + String.join(" ", pb.command()));
         serverProcess = pb.start();

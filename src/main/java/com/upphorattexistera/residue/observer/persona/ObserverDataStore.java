@@ -3,12 +3,14 @@ package com.upphorattexistera.residue.observer.persona;
 import com.google.gson.*;
 import com.upphorattexistera.residue.Residue;
 import com.upphorattexistera.residue.config.ResidueConfig;
+import com.upphorattexistera.residue.config.TTSSpeakers;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,12 +49,16 @@ public class ObserverDataStore {
             ObserverPersona persona = ObserverPersonaLoader.getRandom();
             int personaId = persona != null ? persona.id : 0;
             ObserverGender gender = ObserverGender.random(RANDOM);
+            List<String> pool = TTSSpeakers.forGender(gender.filePrefix, ResidueConfig.INSTANCE.ttsEnabledSpeakers);
+            if (pool.isEmpty()) pool = TTSSpeakers.ALL;
 
             ObserverAssignment assignment = new ObserverAssignment(name, personaId, skinFile, 0);
-            assignment.gender = gender.filePrefix;
 
-            Residue.LOGGER.info("[Residue] New observer assignment: {} → persona={} gender={}",
-                    name, personaId, gender.filePrefix);
+            assignment.gender = gender.filePrefix;
+            assignment.ttsSpeaker = pool.get(RANDOM.nextInt(pool.size()));
+
+            Residue.LOGGER.info("[Residue] New observer assignment: {} → persona={} gender={} speaker={}",
+                    name, personaId, gender.filePrefix, assignment.ttsSpeaker);
 
             return assignment;
         });
@@ -113,6 +119,7 @@ public class ObserverDataStore {
                 obj.addProperty("name", a.name);
                 obj.addProperty("persona_id", a.personaId);
                 obj.addProperty("gender", a.gender);
+                obj.addProperty("tts_speaker", a.ttsSpeaker);
                 obj.addProperty("skin_file", a.skinFile);
                 obj.addProperty("skin_stage", a.skinStage);
                 obj.add("conversation_history", a.conversationHistory);
@@ -146,14 +153,23 @@ public class ObserverDataStore {
                 JsonObject obj = elem.getAsJsonObject();
                 String name = obj.get("name").getAsString();
                 int personaId = obj.get("persona_id").getAsInt();
-                String skinFile = obj.get("skin_file").getAsString();
-                int skinStage = obj.get("skin_stage").getAsInt();
                 String gender = obj.has("gender")
                         ? obj.get("gender").getAsString()
                         : ObserverGender.random(RANDOM).filePrefix;
+                String ttsSpeaker;
+                if (obj.has("tts_speaker")) {
+                    ttsSpeaker = obj.get("tts_speaker").getAsString();
+                } else {
+                    List<String> pool = TTSSpeakers.forGender(gender, ResidueConfig.INSTANCE.ttsEnabledSpeakers);
+                    if (pool.isEmpty()) pool = TTSSpeakers.ALL;
+                    ttsSpeaker = pool.get(RANDOM.nextInt(pool.size()));
+                }
+                String skinFile = obj.get("skin_file").getAsString();
+                int skinStage = obj.get("skin_stage").getAsInt();
 
                 ObserverAssignment assignment = new ObserverAssignment(name, personaId, skinFile, skinStage);
                 assignment.gender = gender;
+                assignment.ttsSpeaker = ttsSpeaker;
 
                 if (obj.has("conversation_history")) {
                     assignment.conversationHistory =

@@ -191,6 +191,10 @@
   "residue.config.tts_enable.desc": "Enables voice synthesis for observer responses. Observers will speak their replies aloud.",
 
   "_comment_tts_models": "— TTS Models —",
+  "residue.config.tts_audible_distance": "Max TTS Audible Distance",
+  "residue.config.tts_audible_distance.desc": "The maximum distance (in blocks) at which TTS audio will be generated. If an entity is further away than this distance, voice synthesis is skipped to save performance, as the sound wouldn't be audible anyway.",
+  "residue.config.tts_pre_roll": "Audio Pre-Roll Delay (ms)",
+  "residue.config.tts_pre_roll.desc": "Delay between chat message appearing and audio playback starting. Synthesis happens first — text appears when audio is ready, then waits this many ms before playing. 0 = simultaneous.",
   "residue.config.tts_tokenizer": "TTS Tokenizer",
   "residue.config.tts_tokenizer.desc": "Select the tokenizer model (required for all TTS variants).",
   "residue.config.tts_custom_tokenizer_name": "Custom Tokenizer Name",
@@ -199,8 +203,8 @@
   "residue.config.tts_talker.desc": "Select the voice model.\n\n§eCustomVoice§r: Uses built-in speaker presets (best for NPCs/mobs).\n§eBase§r: Supports voice cloning from audio references.\n§eVoiceDesign§r: Create voices from text descriptions.",
   "residue.config.tts_custom_talker_name": "Custom Talker Name",
   "residue.config.tts_custom_talker_name.desc": "Specify talker filename (e.g., my_talker.gguf).\nFile must be in: /residue_ai/models/tts/",
-  "residue.config.tts_default_speaker": "Default Speaker Preset",
-  "residue.config.tts_default_speaker.desc": "Default speaker preset for CustomVoice models (e.g., alloy, echo, fable, onyx, nova, shimmer).",
+  "residue.config.tts_enabled_speakers": "Enabled Speakers",
+  "residue.config.tts_enabled_speakers.desc": "Voices available for assignment to observers by gender. Each observer is randomly assigned one matching voice the first time it connects, and keeps it for the rest of the world's lifetime.",
 
   "_comment_tts_download": "— TTS Download —",
   "residue.config.tts_download": "Download TTS Components",
